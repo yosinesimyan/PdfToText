@@ -30,7 +30,7 @@ pipeline {
                     writeFile file: 'Dockerfile', text: dockerfile
 
                     // Build the Docker image
-                    sh 'docker build -t PythonAPP:latest .'
+                    sh 'docker build -t pyapp:latest .'
                 }
             }
         }
@@ -38,7 +38,7 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 // Run the Docker container (adjust options as needed)
-                sh 'docker run --rm PythonAPP:latest'
+                sh 'docker run --rm pyapp:latest'
             }
         }
     }
@@ -46,7 +46,7 @@ pipeline {
     post {
         always {
             // Clean up, remove any images or containers if necessary
-            sh 'docker rmi PythoAPP:latest || true'
+            sh 'docker rmi pyapp:latest || true'
         }
     }
 }
