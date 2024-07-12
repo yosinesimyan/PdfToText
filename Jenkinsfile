@@ -5,7 +5,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Checkout your code from version control
-                git 'https://github.com/your-repo/your-python-app.git'
+                git 'https://github.com/yosinesimyan/PdfToText.git'
             }
         }
         
@@ -21,16 +21,16 @@ pipeline {
                     COPY . .
 
                     # Install dependencies if you have a requirements.txt
-                    # RUN pip install --no-cache-dir -r requirements.txt
+                    RUN pip install --no-cache-dir -r requirements.txt
 
-                    CMD ["python", "your_script.py"]  # Replace with your entry point
+                    CMD ["python", "app.py"]  # Replace with your entry point
                     '''
 
                     // Write Dockerfile to the workspace
                     writeFile file: 'Dockerfile', text: dockerfile
 
                     // Build the Docker image
-                    sh 'docker build -t your-image-name:latest .'
+                    sh 'docker build -t PythonAPP:latest .'
                 }
             }
         }
@@ -38,7 +38,7 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 // Run the Docker container (adjust options as needed)
-                sh 'docker run --rm your-image-name:latest'
+                sh 'docker run --rm PythonAPP:latest'
             }
         }
     }
@@ -46,7 +46,7 @@ pipeline {
     post {
         always {
             // Clean up, remove any images or containers if necessary
-            sh 'docker rmi your-image-name:latest || true'
+            sh 'docker rmi PythoAPP:latest || true'
         }
     }
 }
