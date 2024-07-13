@@ -8,7 +8,14 @@ pipeline {
                 git 'https://github.com/yosinesimyan/PdfToText.git'
             }
         }
-        
+        stage('Clear Old Docker image') {
+           steps {
+               script {
+                 sh 'docker system prune'
+               }
+           }              
+
+        }
         stage('Build Docker Image') {
             steps {
                 script {
