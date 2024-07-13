@@ -13,8 +13,9 @@ pipeline {
             steps {
                 script {
                      // Build the Docker image
-                     dir("app")
-                     sh 'docker build -t pyapp:latest .'
+                     dir("app"){
+                            sh 'docker build -t pyapp:latest .'
+                     }
                 }
             }
         }
