@@ -11,7 +11,8 @@ pipeline {
         stage('Clear Old Docker image') {
            steps {
                script {
-                 sh 'docker system prune'
+                 
+                 sh 'docker stop $(docker ps -a -q) && docker system prune  -a --force'
                }
            }              
 
