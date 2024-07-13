@@ -23,7 +23,8 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 // Run the Docker container (adjust options as needed)
-                sh 'docker run --rm pyapp:latest'
+                //sh 'docker run --rm pyapp:latest'
+                sh 'docker run -d -p 5000:5000 pyapp:latest'
             }
         }
     }
