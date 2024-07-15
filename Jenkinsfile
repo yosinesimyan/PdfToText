@@ -12,7 +12,7 @@ pipeline {
            steps {
                script {
                  
-                 sh 'docker stop $(docker ps -a -q) && docker system prune  -a --force'
+                 sh 'docker ps -aq | xargs docker stop | xargs docker rm'
                }
            }              
 
@@ -38,6 +38,21 @@ pipeline {
     }
     
     post {
+        changed {
+            script {
+                if (currentBuild.currentResult == 'FAILURE') { 
+                    emailext subject: '$DEFAULT_SUBJECT',
+                        body: '$DEFAULT_CONTENT',
+                        recipientProviders: [
+                            [$class: 'CulpritsRecipientProvider'],
+                            [$class: 'DevelopersRecipientProvider'],
+                            [$class: 'RequesterRecipientProvider'] 
+                        ], 
+                        replyTo: '$DEFAULT_REPLYTO',
+                        to: '$DEFAULT_RECIPIENTS'
+                }
+            }
+
         always {
             // Clean up, remove any images or containers if necessary
             sh 'docker rmi pyapp:latest || true'
