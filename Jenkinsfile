@@ -8,15 +8,7 @@ pipeline {
                 git 'https://github.com/yosinesimyan/PdfToText.git'
             }
         }
-        stage('Clear Old Docker image') {
-           steps {
-               script {
-                 
-                 sh 'docker ps -aq | xargs docker stop | xargs docker rm'
-               }
-           }              
-
-        }
+       
         stage('Build Docker Image') {
             steps {
                 script {
@@ -27,12 +19,21 @@ pipeline {
                 }
             }
         }
+        stage('Clear Old Docker image') {
+           steps {
+               script {
+                 
+                 sh 'docker ps -aq --filter="name=WebServer" | xargs docker stop | xargs docker rm'
+               }
+           }              
+
+        }
 
         stage('Run Docker Container') {
             steps {
                 // Run the Docker container (adjust options as needed)
                 //sh 'docker run --rm pyapp:latest'
-                sh 'docker run -d -p 5000:5000 pyapp:latest'
+                sh 'docker run -d -p 5000:5000 --name WebServer pyapp:latest'
             }
         }
     }
