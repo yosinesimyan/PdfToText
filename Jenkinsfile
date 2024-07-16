@@ -23,7 +23,7 @@ pipeline {
            steps {
                script {
                  
-                 sh 'docker ps -aq --filter="name=WebServer" | xargs docker stop | xargs docker rm'
+                 sh 'docker ps -aq --filter="name=WebServer" | xargs docker stop | xargs docker rm || true'
                }
            }              
 
