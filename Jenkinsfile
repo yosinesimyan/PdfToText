@@ -14,7 +14,7 @@ pipeline {
                 script {
                      // Build the Docker image
                      dir("app"){
-                            sh 'docker build -t pyapp:latest .'
+                            sh 'docker build -t app-web:latest .'
                      }
                 }
             }
@@ -23,7 +23,7 @@ pipeline {
            steps {
                script {
                  
-                 sh 'docker ps -aq --filter="name=WebServer" | xargs docker stop | xargs docker rm || true'
+                 sh 'docker ps -aq --filter="name=WebServer" | xargs docker stop 2>/dev/null  | xargs docker rm 2>/dev/null || true'
                }
            }              
 
@@ -33,7 +33,7 @@ pipeline {
             steps {
                 // Run the Docker container (adjust options as needed)
                 //sh 'docker run --rm pyapp:latest'
-                sh 'docker run -d -p 5000:5000 --name WebServer pyapp:latest'
+                sh 'docker run -d -p 5000:5000 --name WebServer app-web:latest'
             }
         }
     }
