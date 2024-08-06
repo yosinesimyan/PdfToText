@@ -15,7 +15,9 @@ pipeline {
         stage('Build image') {
             steps{
                 script {
-                dockerImage = docker.build dockerimagename
+                    dir("app"){
+                        dockerImage = docker.build dockerimagename
+                    }
                 }
             }
         }       
