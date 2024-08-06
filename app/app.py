@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory
 from flask_mysqldb import MySQL
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -40,7 +40,7 @@ def login():
         user = cur.fetchone()
         if check_password_hash(user[2], password):
             session['username'] = username
-            return redirect(url_for('upload_file'))
+            return redirect(url_for('file_list'))
         else:
             flash("Invalid credentials. Please try again.", "danger")
     else:
@@ -93,13 +93,29 @@ def upload_file():
 
             flash('File successfully uploaded', 'success')
             return redirect(url_for('upload_file'))
+            cur = mysql.connection.cursor()
+ 
+    return render_template('upload.html')
+
+
+@app.route('/list')
+def file_list():
+    if 'username' not in session:
+        return redirect(url_for('home'))
 
     cur = mysql.connection.cursor()
-    cur.execute("SELECT concat(left(filename,5),'..',right(filename,4)) as filename, upload_time, filedesc FROM files WHERE username = %s", [session['username']])
+    cur.execute("SELECT concat(left(filename,5),'..',right(filename,4)) as filename, upload_time, filedesc, filename as fn FROM files WHERE username = %s", [session['username']])
     files = cur.fetchall()
     cur.close()
 
-    return render_template('upload.html', files=files)
+    return render_template('files.html', files=files, uname=session['username'])
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    if 'username' not in session:
+        return redirect(url_for('home'))
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 
 @app.route('/logout')
 def logout():

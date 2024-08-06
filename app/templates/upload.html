@@ -41,16 +41,6 @@
         </div>
         <button type="submit" class="btn btn-primary">Upload</button>
       </form>
-      <h3 class="mt-4">Uploaded Files</h3>
-      <ul class="list-group">
-        {% for filename, upload_time, filedesc in files %}
-          <li class="list-group-item">
-            <strong>{{ filedesc }}</strong>
-            <strong>{{ filename }}</strong>
-            <span class="text-muted float-right">{{ upload_time }}</span>
-          </li>
-        {% endfor %}
-      </ul>
       <a href="{{ url_for('logout') }}" class="btn btn-secondary mt-3">Logout</a>
     </div>
   </body>

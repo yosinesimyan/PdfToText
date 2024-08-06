@@ -8,34 +8,55 @@
     <style>
       body, html {
         height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
         background-color: #f8f9fa;
       }
       .files-container {
-        width: 100%;
-        max-width: 600px;
+        max-width: 800px;
+        margin: auto;
         padding: 20px;
-        border-radius: 10px;
         background-color: white;
+        border-radius: 10px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .file-list {
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      .iframe-container {
+        width: 100%;
+        height: 400px;
+        border: none;
+        margin-top: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .topcorner{
+        position:absolute;
+        top:10px;
+        right: 10px;
       }
     </style>
   </head>
   <body>
+    <span><a href="{{ url_for('logout') }}" class="btn btn-secondary mt-3 topcorner">Logout</a></span>
     <div class="files-container">
-      <h2 class="text-center">Your Files</h2>
-      <ul class="list-group">
-        {% for filename, upload_time in files %}
+      <h2 class="text-center">{{ uname }}'s Files</h2>
+      <ul class="list-group file-list">
+        {% for filename, upload_time, filedesc, fn in files %}
           <li class="list-group-item">
-            <a href="{{ url_for('uploaded_file', filename=filename) }}">{{ filename }}</a>
-            <span class="text-muted float-right">{{ upload_time }}</span>
+            <a href="#" onclick="showFile('{{ url_for('uploaded_file', filename=fn) }}')">{{ filename }}</a>
+            <span class="text-muted float-right">{{ upload_time.strftime("%x") }}</span>&nbsp;&nbsp;
+            <span class="text-muted float-right">{{ filedesc }}</span>
           </li>
         {% endfor %}
       </ul>
       <a href="{{ url_for('upload_file') }}" class="btn btn-primary mt-3">Upload More Files</a>
-      <a href="{{ url_for('logout') }}" class="btn btn-secondary mt-3">Logout</a>
+      <iframe id="file-viewer" class="iframe-container" src=""></iframe>
     </div>
+    <script>
+      function showFile(url) {
+        document.getElementById('file-viewer').src = url;
+      }
+    </script>
   </body>
 </html>
