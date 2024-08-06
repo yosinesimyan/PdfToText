@@ -1,6 +1,6 @@
 pipeline {
   environment {
-    dockerimagename = "pdftotext/py-app"
+    dockerimagename = "yosinesimyan/pdftotext"
     dockerImage = ""
   }
     agent any
