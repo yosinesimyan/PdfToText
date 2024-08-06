@@ -1,4 +1,8 @@
 pipeline {
+  environment {
+    dockerimagename = "pdftotext/py-app"
+    dockerImage = ""
+  }
     agent any
 
     stages {
@@ -8,17 +12,36 @@ pipeline {
                 git 'https://github.com/yosinesimyan/PdfToText.git'
             }
         }
-       
-        stage('Build Docker Image') {
-            steps {
+        stage('Build image') {
+            steps{
                 script {
-                     // Build the Docker image
-                     dir("app"){
-                            sh 'docker build -t app-web:latest .'
-                     }
+                dockerImage = docker.build dockerimagename
                 }
             }
-        }
+        }       
+        // stage('Build Docker Image') {
+        //     steps {
+        //         script {
+        //              // Build the Docker image
+        //              dir("app"){
+        //                     sh 'docker build -t app-web:latest .'
+        //              }
+        //         }
+        //     }
+        // }
+
+        stage('Pushing Image') {
+            environment {
+                registryCredential = 'dockerhub-credentials'
+                }
+            steps{
+                script {
+                docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+                    dockerImage.push("latest")
+                }
+                }
+            }
+            }        
         stage('Clear Old Docker image') {
            steps {
                script {
@@ -33,7 +56,7 @@ pipeline {
             steps {
                 // Run the Docker container (adjust options as needed)
                 //sh 'docker run --rm pyapp:latest'
-                sh 'docker run -d -p 5000:5000 --name WebServer app-web:latest'
+                sh 'docker run -d -p 5000:5000 --name WebServer pdftotext/py-app:latest'
             }
         }
     }
