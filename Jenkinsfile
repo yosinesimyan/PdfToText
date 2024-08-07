@@ -1,6 +1,7 @@
 pipeline {
   environment {
     dockerimagename = "yosinesimyan/pdftotext:1.${BUILD_NUMBER}"
+    lastdockerimagename = "yosinesimyan/pdftotext:1.${BUILD_NUMBER-1}"
     dockerImage = ""
   }
     agent any
@@ -60,15 +61,16 @@ pipeline {
                 echo "Running Docker ${dockerimagename}"
                 // Run the Docker container (adjust options as needed)
                 //sh 'docker run --rm pyapp:latest'
-                sh 'docker run -d -p 5000:5000 ${dockerimagename}'
+                sh 'docker run -d -p 5000:5000 --name WebServer ${dockerimagename}'
             }
         }
     }
     
     post {
         always {
+            echo "Removing Docker image ${lastdockerimagename}"
             // Clean up, remove any images or containers if necessary
-            sh 'docker rmi pdftotext:latest || true'
+            sh 'docker rmi ${lastdockerimagename} || true'
         }
     }
 }
