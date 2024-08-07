@@ -1,8 +1,7 @@
 pipeline {
   environment {
-    dockerimagename = "yosinesimyan/pdftotext"
+    dockerimagename = "yosinesimyan/pdftotext:${BUILD_NUMBER}"
     dockerImage = ""
-    BuildNumber =  $BUILD_NUMBER +1
   }
     agent any
 
@@ -15,6 +14,7 @@ pipeline {
         }
         stage('Build image') {
             steps{
+                 echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
                 script {
                     dir("app"){
                         dockerImage = docker.build dockerimagename
@@ -40,7 +40,7 @@ pipeline {
             steps{
                 script {
                 docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
-                    dockerImage.push(BuildNumber)
+                    dockerImage.push("latest")
                 }
                 }
             }
@@ -59,13 +59,12 @@ pipeline {
             steps {
                 // Run the Docker container (adjust options as needed)
                 //sh 'docker run --rm pyapp:latest'
-                sh 'docker run -d -p 5000:5000 --name WebServer yosinesimyan/pdftotext:'.BuildNumber
+                sh 'docker run -d -p 5000:5000 ${dockerimagename}'
             }
         }
     }
     
     post {
-
         always {
             // Clean up, remove any images or containers if necessary
             sh 'docker rmi pdftotext:latest || true'
