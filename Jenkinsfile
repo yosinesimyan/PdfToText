@@ -58,7 +58,7 @@ pipeline {
             steps {
                 // Run the Docker container (adjust options as needed)
                 //sh 'docker run --rm pyapp:latest'
-                sh 'docker run -d -p 5000:5000 --name WebServer pdftotext/py-app:latest'
+                sh 'docker run -d -p 5000:5000 --name WebServer yosinesimyan/pdftotext'
             }
         }
     }
@@ -67,7 +67,7 @@ pipeline {
 
         always {
             // Clean up, remove any images or containers if necessary
-            sh 'docker rmi pyapp:latest || true'
+            sh 'docker rmi pdftotext:latest || true'
         }
     }
 }
