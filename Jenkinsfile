@@ -2,6 +2,7 @@ pipeline {
   environment {
     dockerimagename = "yosinesimyan/pdftotext"
     dockerImage = ""
+    BuildNumber =  $BUILD_NUMBER +1
   }
     agent any
 
@@ -39,7 +40,7 @@ pipeline {
             steps{
                 script {
                 docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
-                    dockerImage.push("latest")
+                    dockerImage.push(BuildNumber)
                 }
                 }
             }
@@ -58,7 +59,7 @@ pipeline {
             steps {
                 // Run the Docker container (adjust options as needed)
                 //sh 'docker run --rm pyapp:latest'
-                sh 'docker run -d -p 5000:5000 --name WebServer yosinesimyan/pdftotext'
+                sh 'docker run -d -p 5000:5000 --name WebServer yosinesimyan/pdftotext:'.BuildNumber
             }
         }
     }
