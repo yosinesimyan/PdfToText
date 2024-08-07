@@ -1,6 +1,6 @@
 pipeline {
   environment {
-    dockerimagename = "yosinesimyan/pdftotext:${BUILD_NUMBER}"
+    dockerimagename = "yosinesimyan/pdftotext:1.${BUILD_NUMBER}"
     dockerImage = ""
   }
     agent any
@@ -40,7 +40,7 @@ pipeline {
             steps{
                 script {
                 docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
-                    dockerImage.push("latest")
+                    dockerImage.push("${dockerimagename}")
                 }
                 }
             }
