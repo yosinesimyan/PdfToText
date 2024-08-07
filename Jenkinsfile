@@ -14,7 +14,7 @@ pipeline {
         }
         stage('Build image') {
             steps{
-                 echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
+                echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
                 script {
                     dir("app"){
                         dockerImage = docker.build dockerimagename
@@ -40,7 +40,7 @@ pipeline {
             steps{
                 script {
                 docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
-                    dockerImage.push("${dockerimagename}")
+                    dockerImage.push("1.${BUILD_NUMBER}")
                 }
                 }
             }
@@ -57,6 +57,7 @@ pipeline {
 
         stage('Run Docker Container') {
             steps {
+                echo "Running Docker ${dockerimagename}"
                 // Run the Docker container (adjust options as needed)
                 //sh 'docker run --rm pyapp:latest'
                 sh 'docker run -d -p 5000:5000 ${dockerimagename}'
