@@ -3,6 +3,8 @@ from flask_mysqldb import MySQL
 from werkzeug.security import generate_password_hash, check_password_hash
 import yaml
 import os
+from datetime import datetime
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -19,6 +21,10 @@ mysql = MySQL(app)
 @app.route('/')
 def home():
     return render_template('login.html')
+
+@app.route('/datetime')
+def example():
+    return render_template('datetime.html', datetime = str(datetime.now()))
 
 @app.route('/login', methods=['POST'])
 def login():

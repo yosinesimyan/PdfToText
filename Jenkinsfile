@@ -1,4 +1,8 @@
 pipeline {
+  environment {
+    dockerimagename = "yosinesimyan/pdftotext"
+    dockerImage = ""
+  }
     agent any
 
     stages {
@@ -8,24 +12,46 @@ pipeline {
                 git 'https://github.com/yosinesimyan/PdfToText.git'
             }
         }
+        stage('Build image') {
+            steps{
+                script {
+                    dir("app"){
+                        dockerImage = docker.build dockerimagename
+                    }
+                }
+            }
+        }       
+        // stage('Build Docker Image') {
+        //     steps {
+        //         script {
+        //              // Build the Docker image
+        //              dir("app"){
+        //                     sh 'docker build -t app-web:latest .'
+        //              }
+        //         }
+        //     }
+        // }
+
+        stage('Pushing Image') {
+            environment {
+                registryCredential = 'dockerhub-credentials'
+                }
+            steps{
+                script {
+                docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+                    dockerImage.push("latest")
+                }
+                }
+            }
+            }        
         stage('Clear Old Docker image') {
            steps {
                script {
                  
-                 sh 'docker ps -aq | xargs docker stop | xargs docker rm'
+                 sh 'docker ps -aq --filter="name=WebServer" | xargs docker stop 2>/dev/null  | xargs docker rm 2>/dev/null || true'
                }
            }              
 
-        }
-        stage('Build Docker Image') {
-            steps {
-                script {
-                     // Build the Docker image
-                     dir("app"){
-                            sh 'docker build -t pyapp:latest .'
-                     }
-                }
-            }
         }
 
         stage('Run Docker Container') {
@@ -38,9 +64,25 @@ pipeline {
     }
     
     post {
+        changed {
+            script {
+                if (currentBuild.currentResult == 'FAILURE') { 
+                    emailext subject: '$DEFAULT_SUBJECT',
+                        body: '$DEFAULT_CONTENT',
+                        recipientProviders: [
+                            [$class: 'CulpritsRecipientProvider'],
+                            [$class: 'DevelopersRecipientProvider'],
+                            [$class: 'RequesterRecipientProvider'] 
+                        ], 
+                        replyTo: '$DEFAULT_REPLYTO',
+                        to: '$DEFAULT_RECIPIENTS'
+                }
+            }
+
         always {
             // Clean up, remove any images or containers if necessary
-            sh 'docker rmi pyapp:latest || true'
+            sh 'docker rmi pdftotext:latest || true'
         }
     }
 }
+
