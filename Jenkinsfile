@@ -14,8 +14,13 @@ pipeline {
             }
         }
         stage('Build image') {
-            steps{
+            when {
+                branch "master"
+            }
+            steps {
                 echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
+                //build the docker image that the app use. 
+                sh 
                 script {
                     dir("app"){
                         dockerImage = docker.build dockerimagename
@@ -23,22 +28,28 @@ pipeline {
                 }
             }
         }       
-        // stage('Build Docker Image') {
-        //     steps {
-        //         script {
-        //              // Build the Docker image
-        //              dir("app"){
-        //                     sh 'docker build -t app-web:latest .'
-        //              }
-        //         }
-        //     }
-        // }
+        stage('Build features image') {
+            when {
+                branch "files"
+            }
+            steps {
+                dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"
+                echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
+                //build the docker image that the app use. 
+                sh 'cat Dockerfile'
+                script {
+                    dir("app") {
+                        dockerImage = docker.build dockerimagename
+                    }
+                }
+            }
+        }       
 
         stage('Pushing Image') {
             environment {
                 registryCredential = 'dockerhub-credentials'
                 }
-            steps{
+            steps {
                 script {
                 docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
                     dockerImage.push("1.${BUILD_NUMBER}")
@@ -48,8 +59,7 @@ pipeline {
             }        
         stage('Clear Old Docker image') {
            steps {
-               script {
-                 
+               script {                 
                  sh 'docker ps -aq --filter="name=WebServer" | xargs docker stop 2>/dev/null  | xargs docker rm 2>/dev/null || true'
                }
            }              
