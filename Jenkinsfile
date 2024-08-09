@@ -20,7 +20,6 @@ pipeline {
             steps {
                 echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
                 //build the docker image that the app use. 
-                sh 
                 script {
                     dir("app"){
                         dockerImage = docker.build dockerimagename
