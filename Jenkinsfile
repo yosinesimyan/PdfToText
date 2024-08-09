@@ -1,5 +1,9 @@
 pipeline {
   environment {
+<<<<<<< HEAD
+=======
+    //add params for Docker Image Name and Last Docker Image Name. we will use them later.
+>>>>>>> 5542965c47be029bf912821ec5b5c9c2c011112a
     dockerimagename = "yosinesimyan/pdftotext:1.${BUILD_NUMBER}"
     lastdockerimagename = "yosinesimyan/pdftotext:1.${BUILD_NUMBER-1}"
     dockerImage = ""
@@ -19,7 +23,11 @@ pipeline {
             }
             steps {
                 echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
+<<<<<<< HEAD
                 //build the docker image that the app use. 
+=======
+                //build the docker image that the app will use. 
+>>>>>>> 5542965c47be029bf912821ec5b5c9c2c011112a
                 script {
                     dir("app"){
                         dockerImage = docker.build dockerimagename
@@ -49,6 +57,10 @@ pipeline {
                 registryCredential = 'dockerhub-credentials'
                 }
             steps {
+<<<<<<< HEAD
+=======
+                //push the image to DockeHub repository
+>>>>>>> 5542965c47be029bf912821ec5b5c9c2c011112a
                 script {
                 docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
                     dockerImage.push("1.${BUILD_NUMBER}")
@@ -58,7 +70,12 @@ pipeline {
             }        
         stage('Clear Old Docker image') {
            steps {
+<<<<<<< HEAD
                script {                 
+=======
+               script { 
+                 //after the new image is ready, we stop and remove the old running docker image                
+>>>>>>> 5542965c47be029bf912821ec5b5c9c2c011112a
                  sh 'docker ps -aq --filter="name=WebServer" | xargs docker stop 2>/dev/null  | xargs docker rm 2>/dev/null || true'
                }
            }              
@@ -82,5 +99,9 @@ pipeline {
             sh 'docker rmi ${lastdockerimagename} || true'
         }
     }
+<<<<<<< HEAD
 }
 
+=======
+}
+>>>>>>> 5542965c47be029bf912821ec5b5c9c2c011112a
