@@ -35,10 +35,10 @@ pipeline {
             steps {
                 //dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"
                 echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
-                //build the docker image that the app use. 
-                sh 'cat Dockerfile'
+                //build the docker image that the app use.                 
                 script {
                     dir("app") {
+                        sh 'cat Dockerfile'
                         dockerImage = docker.build dockerimagename
                     }
                 }
