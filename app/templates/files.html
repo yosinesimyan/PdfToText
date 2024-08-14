@@ -11,20 +11,30 @@
         background-color: #f8f9fa;
       }
       .files-container {
-        max-width: 800px;
+        width: 1000px;        
         margin: auto;
         padding: 20px;
         background-color: white;
         border-radius: 10px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       }
+      .file-list-container {
+        max-width: 300px;
+        margin: auto;
+        padding: 20px;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);       
+        display: inline-block;
+      }
+
       .file-list {
-        max-height: 200px;
+        max-width: 250px;
         overflow-y: auto;
       }
       .iframe-container {
-        width: 100%;
-        height: 400px;
+        width: 100%;  
+        height: 500px;     
         border: none;
         margin-top: 20px;
         border-radius: 10px;
@@ -39,24 +49,42 @@
   </head>
   <body>
     <span><a href="{{ url_for('logout') }}" class="btn btn-secondary mt-3 topcorner">Logout</a></span>
-    <div class="files-container">
+    <div style="display: grid; grid-template-columns: 1fr 1fr;"> 
+    <div class="file-list-container">
       <h2 class="text-center">{{ uname }}'s Files</h2>
       <ul class="list-group file-list">
-        {% for filename, upload_time, filedesc, fn in files %}
+        {% for filename, upload_time, filedesc, fn, filetext in files %}
           <li class="list-group-item">
-            <a href="#" onclick="showFile('{{ url_for('uploaded_file', filename=fn) }}')">{{ filename }}</a>
-            <span class="text-muted float-right">{{ upload_time.strftime("%x") }}</span>&nbsp;&nbsp;
+            <a href="#" onclick="showFile('{{ url_for('uploaded_file', filename=fn) }}', '{{ filetext }}')">{{ filename }}</a>
+            <span class="text-muted float-right">{{ upload_time.strftime("%x") }}</span>
             <span class="text-muted float-right">{{ filedesc }}</span>
           </li>
         {% endfor %}
       </ul>
       <a href="{{ url_for('upload_file') }}" class="btn btn-primary mt-3">Upload More Files</a>
+    </div>
+    <div class="files-container" >
       <iframe id="file-viewer" class="iframe-container" src=""></iframe>
+      <div id="file-text" class="text"></div>
+    </div>
     </div>
     <script>
-      function showFile(url) {
-        document.getElementById('file-viewer').src = url;
-      }
+      function showFile(url, text) {
+        try {
+              document.getElementById('file-viewer').src = url;
+              document.getElementById('file-text').innerHTML = text;
+        }
+        catch(err) {
+              alert(err.message);
+              document.getElementById('file-text').innerHTML = err.message;
+       }
+     }
+     function HtmlEncode(s) {
+         var el = document.createElement("div");
+         el.innerText = el.textContent = s;
+         s = el.innerHTML;
+         return s;
+     }
     </script>
   </body>
 </html>

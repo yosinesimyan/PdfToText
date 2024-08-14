@@ -21,9 +21,16 @@
         background-color: white;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       }
+      .topcorner{
+        position:absolute;
+        top:10px;
+        left: 10px;
+      }
+
     </style>
   </head>
   <body>
+    <span><a href="{{ url_for('logout') }}" class="btn btn-secondary mt-3 topcorner">Logout</a></span>
     <div class="upload-container">
       <h2 class="text-center">Upload File</h2>
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -41,7 +48,6 @@
         </div>
         <button type="submit" class="btn btn-primary">Upload</button>
       </form>
-      <a href="{{ url_for('logout') }}" class="btn btn-secondary mt-3">Logout</a>
     </div>
   </body>
 </html>
