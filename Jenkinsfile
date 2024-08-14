@@ -33,14 +33,16 @@ pipeline {
                 branch "files"
             }
             steps {
-                //dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"
-                echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
-                //build the docker image that the app use.                 
-                script {
-                    dir("app") {
-                        sh 'cat Dockerfile'
-                        dockerImage = docker.build dockerimagename
-                    }
+                withEnv([dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"]) {
+                   //dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"
+                   echo "Running ${dockerimagename } on ${env.JENKINS_URL}"
+                   //build the docker image that the app use.                 
+                   script {
+                       dir("app") {
+                           sh 'cat Dockerfile'
+                           dockerImage = docker.build dockerimagename
+                       }
+                   }
                 }
             }
         }       
