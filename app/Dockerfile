@@ -31,6 +31,8 @@
   RUN pip install --no-cache-dir -r requirements.txt
 
   #The command to start the python application container
-   
+  RUN --mount=type=secret,id=MYSQL_USER \
+      --mount=type=secret,id=MYSQL_PASSWORD \
+  echo "MySQL user: $(cat /run/secrets/mysql_user)" 
   CMD ["python", "app.py"]  # entry point
 
