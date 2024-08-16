@@ -42,7 +42,7 @@ pipeline {
                 //build the docker image that the app will use. 
                 script {
                     dir("app"){
-                        dockerImage = docker.build ${docker_args} dockerimagename
+                        dockerImage = docker.build docker_args dockerimagename
                     }
                 }
             }
