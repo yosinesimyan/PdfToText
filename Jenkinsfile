@@ -4,13 +4,6 @@ pipeline {
     dockerimagename = "yosinesimyan/pdftotext:1.${BUILD_NUMBER}"
     lastdockerimagename = "yosinesimyan/pdftotext:1.${BUILD_NUMBER-1}"
     dockerImage = ""
-   
-
-        //Just another way to use jenkins credentials:
-        //CREDS = credentials('Mysql-Credentials')
-        //steps {
-        // username as $CREDS_USR
-        // and password as $CREDS_PSW}
   }
     agent any
 
@@ -21,52 +14,36 @@ pipeline {
                 git 'https://github.com/yosinesimyan/PdfToText.git'
             }
         }
-
-        stage('Get UserName Password') {   
-            steps {   
-               script {      
-                   withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
-                      docker_args = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD" 
-                  }
-               }
-            }
-        }
-
         stage('Build image') {
-           // when {
-                //branch "master"
-           //      expression { env.BRANCH_NAME == 'master' }
-          //  }
+            when {
+                branch "master"
+            }
             steps {
                 echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
                 //build the docker image that the app will use. 
                 script {
                     dir("app"){
-                        dockerImage = docker.build docker_args dockerimagename
+                        dockerImage = docker.build dockerimagename
                     }
                 }
             }
-        }    
-       
-     //   stage('Build features image') {
-     //       when {
-     //           //branch "files"
-     //            expression { env.BRANCH_NAME == 'files' }
-    //        }
-     //       steps {               
-     //           withEnv([dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"]) {
-     //                echo "Running ${dockerimagename } on ${env.JENKINS_URL}"
-     //                //build the docker image that the app use.                 
-     //                script {
-     //                    dir("app") {
-     //                    sh 'cat Dockerfile'
-     //                    dockerImage = docker.build ${docker_args} dockerimagename
-     //                    }
-     //                }
-     //           }
-     //            
-      //      }
-       // }       
+        }       
+        stage('Build features image') {
+            when {
+                branch "files"
+            }
+            steps {
+                //dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"
+                echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
+                //build the docker image that the app use.                 
+                script {
+                    dir("app") {
+                        sh 'cat Dockerfile'
+                        dockerImage = docker.build dockerimagename
+                    }
+                }
+            }
+        }       
 
         stage('Pushing Image') {
             environment {
