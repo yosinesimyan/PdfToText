@@ -33,10 +33,10 @@ pipeline {
         }
 
         stage('Build image') {
-            when {
+           // when {
                 //branch "master"
-                 expression { env.BRANCH_NAME == 'master' }
-            }
+           //      expression { env.BRANCH_NAME == 'master' }
+          //  }
             steps {
                 echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
                 //build the docker image that the app will use. 
@@ -48,25 +48,25 @@ pipeline {
             }
         }    
        
-        stage('Build features image') {
-            when {
-                //branch "files"
-                 expression { env.BRANCH_NAME == 'files' }
-            }
-            steps {               
-                withEnv([dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"]) {
-                     echo "Running ${dockerimagename } on ${env.JENKINS_URL}"
-                     //build the docker image that the app use.                 
-                     script {
-                         dir("app") {
-                         sh 'cat Dockerfile'
-                         dockerImage = docker.build ${docker_args} dockerimagename
-                         }
-                     }
-                }
-                 
-            }
-        }       
+     //   stage('Build features image') {
+     //       when {
+     //           //branch "files"
+     //            expression { env.BRANCH_NAME == 'files' }
+    //        }
+     //       steps {               
+     //           withEnv([dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"]) {
+     //                echo "Running ${dockerimagename } on ${env.JENKINS_URL}"
+     //                //build the docker image that the app use.                 
+     //                script {
+     //                    dir("app") {
+     //                    sh 'cat Dockerfile'
+     //                    dockerImage = docker.build ${docker_args} dockerimagename
+     //                    }
+     //                }
+     //           }
+     //            
+      //      }
+       // }       
 
         stage('Pushing Image') {
             environment {
