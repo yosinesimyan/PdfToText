@@ -49,7 +49,7 @@ pipeline {
                 script {
                     dir("app") {
                         sh 'cat Dockerfile'
-                        dockerImage = docker.build dockerimagename
+                        dockerImage = docker.build docker_args dockerimagename
                     }
                 }
             }
