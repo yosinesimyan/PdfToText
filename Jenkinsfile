@@ -34,17 +34,21 @@ pipeline {
                     }
                 }
             }
-        }       
+        }    
+        stage('Get UserName Password') {   
+            steps {         
+                 withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
+                    docker_args = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD" 
+                }
+            }
+        }
+ 
         stage('Build features image') {
             when {
                 branch "files"
             }
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
-                    docker_args = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD" 
-                }
+            steps {               
                 withEnv([dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"]) {
-                     //dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"
                      echo "Running ${dockerimagename } on ${env.JENKINS_URL}"
                      //build the docker image that the app use.                 
                      script {
