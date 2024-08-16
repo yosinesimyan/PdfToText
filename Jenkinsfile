@@ -5,7 +5,7 @@ pipeline {
     lastdockerimagename = "yosinesimyan/pdftotext:1.${BUILD_NUMBER-1}"
     dockerImage = ""
     withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
-        DOCKER_ARGS = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD"
+        DockerArgs = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD"
     }
 
         //Just another way to use jenkins credentials:
@@ -49,7 +49,7 @@ pipeline {
                    script {
                        dir("app") {
                            sh 'cat Dockerfile'
-                           dockerImage = docker.build ${DOCKER_ARGS} dockerimagename
+                           dockerImage = docker.build ${DockerArgs} dockerimagename
                        }
                    }
                 }
