@@ -21,20 +21,7 @@ pipeline {
                 git 'https://github.com/yosinesimyan/PdfToText.git'
             }
         }
-        stage('Build image') {
-            when {
-                branch "master"
-            }
-            steps {
-                echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
-                //build the docker image that the app will use. 
-                script {
-                    dir("app"){
-                        dockerImage = docker.build dockerimagename
-                    }
-                }
-            }
-        }    
+
         stage('Get UserName Password') {   
             steps {   
                script {      
@@ -44,7 +31,22 @@ pipeline {
                }
             }
         }
- 
+
+        stage('Build image') {
+            when {
+                branch "master"
+            }
+            steps {
+                echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
+                //build the docker image that the app will use. 
+                script {
+                    dir("app"){
+                        dockerImage = docker.build ${docker_args} dockerimagename
+                    }
+                }
+            }
+        }    
+       
         stage('Build features image') {
             when {
                 branch "files"
