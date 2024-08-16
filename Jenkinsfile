@@ -12,8 +12,6 @@ pipeline {
         // username as $CREDS_USR
         // and password as $CREDS_PSW}
         DOCKER_ARGS = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD"
-
-}
   }
     agent any
 
