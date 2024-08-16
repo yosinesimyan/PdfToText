@@ -49,9 +49,9 @@ pipeline {
                 script {
                     dir("app") {
                                                  withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
-                                                               docker_args = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD" 
+                                                              docker_args = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD" 
                                sh 'cat Dockerfile'
-                              dockerImage = docker.build (dockerimagename, docker_args)
+                               dockerImage = docker.build(dockerimagename, "${docker_args}")
                         }
                     }
                 }
