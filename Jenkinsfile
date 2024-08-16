@@ -41,7 +41,7 @@ pipeline {
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
-                    DockerArgs = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD" 
+                    docker_args = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD" 
                 }
                 withEnv([dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"]) {
                      //dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"
@@ -50,7 +50,7 @@ pipeline {
                      script {
                          dir("app") {
                          sh 'cat Dockerfile'
-                         dockerImage = docker.build ${DockerArgs} dockerimagename
+                         dockerImage = docker.build ${docker_args} dockerimagename
                          }
                      }
                 }
