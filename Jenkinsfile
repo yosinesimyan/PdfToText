@@ -34,7 +34,8 @@ pipeline {
 
         stage('Build image') {
             when {
-                branch "master"
+                //branch "master"
+                 expression { env.BRANCH_NAME == 'master' }
             }
             steps {
                 echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
@@ -49,7 +50,8 @@ pipeline {
        
         stage('Build features image') {
             when {
-                branch "files"
+                //branch "files"
+                 expression { env.BRANCH_NAME == 'files' }
             }
             steps {               
                 withEnv([dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"]) {
