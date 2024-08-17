@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 import os
 import yaml
 import PyPDF2
+import sys
 
 
 app = Flask(__name__)
@@ -13,12 +14,12 @@ app.secret_key = 'your_secret_key'
 # Configure MySQL
 db = yaml.load(open('db.yaml'), Loader=yaml.FullLoader)
 app.config['MYSQL_HOST'] = db['mysql_host']
-app.config['MYSQL_USER'] = db['mysql_user']
-app.config['MYSQL_PASSWORD'] = db['mysql_password']
+app.config['MYSQL_USER'] =  sys.argv[1] #db['mysql_user']
+app.config['MYSQL_PASSWORD'] =  sys.argv[2] #db['mysql_password']
 app.config['MYSQL_DB'] = db['mysql_db']
 
 mysql = MySQL(app)
-ssql="SELECT concat(left(filename,5),'..',right(filename,4)) as filename, upload_time, filedesc, filename as fn, replace(filetext,'\r\n','<br>') FROM files WHERE username = %s"
+ssql="SELECT concat(left(filename,5),'..',right(filename,4)) as filename, upload_time, filedesc, filename as fn, replace(filetext,'\r','<br>') FROM files WHERE username = %s"
 
 # File upload configuration
 UPLOAD_FOLDER = 'uploads/'

@@ -1,8 +1,10 @@
-  #It will use python latest image as the parent image for
+  #It will use python image as the parent image for
   #building the Docker image
-
+  
+  ARG MYSQL_USER
+  ARG MYSQL_PASSWORD
+  
   FROM python:3.9.19-slim-bullseye
-  #FROM python:latest
 
   #create a working directory for the Python app
   #the python app will run from this working directory.
@@ -34,5 +36,5 @@
   RUN --mount=type=secret,id=MYSQL_USER \
       --mount=type=secret,id=MYSQL_PASSWORD \
   echo "MySQL user: $(cat /run/secrets/mysql_user)" 
-  CMD ["python", "app.py"]  # entry point
+  CMD ["python", "app.py", $MYSQL_PASSWORD, $MYSQL_PASSWORD]  # entry point
 
