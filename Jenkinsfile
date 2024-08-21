@@ -75,7 +75,7 @@ pipeline {
                 echo "Running Docker ${dockerimagename}"
                 // Run the Docker container (adjust options as needed)
                  withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
-                     docker_args = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD" 
+                    // docker_args = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD" 
                      sh 'docker run -d -p 5000:5000 --name WebServer ${dockerimagename} $MYSQL_USER $MYSQL_PASSWORD'
                  }
             }
