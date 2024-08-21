@@ -2,6 +2,7 @@ pipeline {
   environment {
     //add params for Docker Image Name and Last Docker Image Name. we will use them later.
     dockerimagename = "yosinesimyan/pdftotext:1.${BUILD_NUMBER}"
+    dockerimagenamefeat = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"
     lastdockerimagename = "yosinesimyan/pdftotext:1.${BUILD_NUMBER-1}"
     dockerImage = ""
   }
@@ -14,16 +15,6 @@ pipeline {
                 git 'https://github.com/yosinesimyan/PdfToText.git'
             }
         }
-     //   stage('Get UserName Password') {   
-     //       steps {   
-     //          script {      
-     //              withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
-     //                 docker_args = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD" 
-     //             }
-     //          }
-     //       }
-     //   }
-
         stage('Build image') {
             when {
                 branch "master"
@@ -33,11 +24,8 @@ pipeline {
                 //build the docker image that the app will use. 
                 script {
                     dir("app"){
-                        withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
-                               docker_args = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD" 
-                               sh 'cat Dockerfile'
-                               dockerImage = docker.build(dockerimagename, "${docker_args} -f Dockerfile .")
-                        }
+                        sh 'cat Dockerfile'
+                        dockerImage = docker.build(dockerimagename, "${docker_args} -f Dockerfile .")
                     }
                 }
             }
@@ -52,11 +40,8 @@ pipeline {
                 //build the docker image that the app use.                 
                 script {
                     dir("app") {
-                                                 withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
-                                                              docker_args = "secret:args --build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD" 
-                               sh 'cat Dockerfile'
-                               dockerImage = docker.build(dockerimagename, "${docker_args} -f Dockerfile .")
-                        }
+                        sh 'cat Dockerfile'
+                        dockerImage = docker.build(dockerimagenamefeat , "${docker_args} -f Dockerfile .")
                     }
                 }
             }
@@ -89,8 +74,10 @@ pipeline {
             steps {
                 echo "Running Docker ${dockerimagename}"
                 // Run the Docker container (adjust options as needed)
-                //sh 'docker run --rm pyapp:latest'
-                sh 'docker run -d -p 5000:5000 --name WebServer ${dockerimagename}'
+                 withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
+                     docker_args = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD" 
+                     sh 'docker run -d -p 5000:5000 --name WebServer ${dockerimagename} $MYSQL_USER $MYSQL_PASSWORD'
+                 }
             }
         }
     }

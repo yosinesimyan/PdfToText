@@ -36,5 +36,5 @@
   #RUN --mount=type=secret,id=MYSQL_USER \
   #    --mount=type=secret,id=MYSQL_PASSWORD \
   #echo "MySQL user: $(cat /run/secrets/mysql_user)" 
-  CMD ["python", "app.py", "$MYSQL_PASSWORD", "$MYSQL_PASSWORD"]  # entry point
+  CMD ["python", "app.py"]  # entry point
 
