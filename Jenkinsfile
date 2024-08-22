@@ -20,7 +20,7 @@ pipeline {
                 branch "master"
             }
             steps {
-                echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
+                echo "Running ${dockerimagename} on ${env.JENKINS_URL}"
                 //build the docker image that the app will use. 
                 script {
                     dir("app"){
@@ -35,8 +35,7 @@ pipeline {
                 branch "files"
             }
             steps {
-                //dockerimagename = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"
-                echo "Running ${BUILD_NUMBER} on ${env.JENKINS_URL}"
+                echo "Running ${dockerimagenamefeat} on ${env.JENKINS_URL}"
                 //build the docker image that the app use.                 
                 script {
                     dir("app") {
