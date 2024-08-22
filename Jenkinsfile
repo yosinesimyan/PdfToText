@@ -24,6 +24,7 @@ pipeline {
                 //build the docker image that the app will use. 
                 script {
                     dir("app"){
+                        echo "on branch Master"
                         sh 'cat Dockerfile'
                         dockerImage = docker.build(dockerimagename, "${docker_args} -f Dockerfile .")
                     }
@@ -39,6 +40,7 @@ pipeline {
                 //build the docker image that the app use.                 
                 script {
                     dir("app") {
+                        echo "on branch Files
                         sh 'cat Dockerfile'
                         dockerImage = docker.build(dockerimagenamefeat , "${docker_args} -f Dockerfile .")
                     }
