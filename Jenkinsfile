@@ -41,7 +41,7 @@ pipeline {
                 script {
                     dir("app") {
                         echo "on branch Files"
-                        sh 'cat Dockerfile'
+                        //sh 'cat Dockerfile'
                         dockerImage = docker.build(dockerimagenamefeat)
                     }
                 }
@@ -55,12 +55,12 @@ pipeline {
             steps {
                 //push the image to DockeHub repository
                 script {
-                docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
-                    dockerImage.push("1.${BUILD_NUMBER}")
-                }
+                   docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+                       dockerImage.push("1.${BUILD_NUMBER}")
+                   }
                 }
             }
-            }        
+        }        
        // stage('Clear Old Docker image') {
        //    steps {
        //        script { 
@@ -76,13 +76,13 @@ pipeline {
                 // Run the Docker container (adjust options as needed)
                 dir("app") {
                    withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
-                        f = new File('.env')
-                        f.append('echo MYSQL_USER=$MYSQL_USER')
-                        f.append('\nMYSQL_PASSWORD=$MYSQL_PASSWORD')
-                        //sh '"echo MYSQL_USER=$MYSQL_USER" > .env'
-                        //sh '"MYSQL_PASSWORD=$MYSQL_PASSWORD" >> "\n" >> .env'
+                       // f = new File('.env')
+                       // f.append('echo MYSQL_USER=$MYSQL_USER')
+                       // f.append('\nMYSQL_PASSWORD=$MYSQL_PASSWORD')
+                       sh 'echo "MYSQL_USER=$MYSQL_USER" > .env'
+                       sh 'echo "MYSQL_PASSWORD=$MYSQL_PASSWORD" >> "\n" >> .env'
                         //sh 'docker run -d -p 5000:5000 --name WebServer ${dockerimagename}'
-                        sh 'docker compose up'
+                       sh 'docker compose up'
                    }
                 }
             }
