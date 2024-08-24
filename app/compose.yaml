@@ -1,0 +1,14 @@
+version: '3.1'
+
+services:
+  server:
+    image: yosinesimyan/pdftotext:latest
+    #name: WebServer
+    ports:
+      - 5000:5000
+    environment:
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+    working_dir: /app
+    command: python app.py

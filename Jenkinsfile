@@ -61,24 +61,27 @@ pipeline {
                 }
             }
             }        
-        stage('Clear Old Docker image') {
-           steps {
-               script { 
-                 //after the new image is ready, we stop and remove the old running docker image                
-                 sh 'docker ps -aq --filter="name=WebServer" | xargs docker stop 2>/dev/null  | xargs docker rm 2>/dev/null || true'
-               }
-           }              
-
-        }
+       // stage('Clear Old Docker image') {
+       //    steps {
+       //        script { 
+       //          //after the new image is ready, we stop and remove the old running docker image                
+       //          sh 'docker ps -aq --filter="name=WebServer" | xargs docker stop 2>/dev/null  | xargs docker rm 2>/dev/null || true'
+       //        }
+       //    }              
+       // }
 
         stage('Run Docker Container') {
             steps {
                 echo "Running Docker ${dockerimagename}"
                 // Run the Docker container (adjust options as needed)
-                 withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
-                    // docker_args = "--build-arg MYSQL_USER=$MYSQL_USER --build-arg MYSQL_PASSWORD=$MYSQL_PASSWORD" 
-                     sh 'docker run -d -p 5000:5000 --name WebServer ${dockerimagename} $MYSQL_USER $MYSQL_PASSWORD'
-                 }
+                dir("app") {
+                   withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
+                        sh "echo MYSQL_USER=$MYSQL_USER \
+                            MYSQL_PASSWORD=$MYSQL_PASSWORD" > .env
+                        //sh 'docker run -d -p 5000:5000 --name WebServer ${dockerimagename}'
+                        sh "docker compose up"
+                   }
+                }
             }
         }
     }
