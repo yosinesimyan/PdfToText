@@ -77,7 +77,7 @@ pipeline {
                 dir("app") {
                    withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
                         sh '"echo MYSQL_USER=$MYSQL_USER" > .env'
-                        sh '"MYSQL_PASSWORD=$MYSQL_PASSWORD" >> '\n' >> .env'
+                        sh '"MYSQL_PASSWORD=$MYSQL_PASSWORD" >> "\n" >> .env'
                         //sh 'docker run -d -p 5000:5000 --name WebServer ${dockerimagename}'
                         sh 'docker compose up'
                    }
