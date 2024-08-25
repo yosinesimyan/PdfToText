@@ -24,7 +24,7 @@ pipeline {
                 //build the docker image that the app will use. 
                 script {
                     dir("app"){
-                        dockerImage = docker.build(dockerimagename, "yosinesimyan/pdftotext:latest .")
+                        dockerImage = docker.build(dockerimagename, "-t yosinesimyan/pdftotext:latest .")
                     }
                 }
             }
@@ -38,7 +38,7 @@ pipeline {
                 //build the docker image that the app use.                 
                 script {
                     dir("app") {
-                        dockerImage = docker.build(dockerimagenamefeat, "yosinesimyan/pdftotextfeat:latest .")
+                        dockerImage = docker.build(dockerimagenamefeat, "-t yosinesimyan/pdftotextfeat:latest .")
                     }
                 }
             }
