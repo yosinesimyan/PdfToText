@@ -15,7 +15,7 @@ pipeline {
                 git 'https://github.com/yosinesimyan/PdfToText.git'
             }
         }
-        stage('Build image') {
+        stage('Build master image') {
             when {
                 branch "master"
             }
@@ -24,9 +24,7 @@ pipeline {
                 //build the docker image that the app will use. 
                 script {
                     dir("app"){
-                        echo "on branch Master"
-                        sh 'cat Dockerfile'
-                        dockerImage = docker.build(dockerimagename)
+                        dockerImage = docker.build(dockerimagename, "yosinesimyan/pdftotext:latest .")
                     }
                 }
             }
@@ -40,9 +38,7 @@ pipeline {
                 //build the docker image that the app use.                 
                 script {
                     dir("app") {
-                        echo "on branch Files"
-                        //sh 'cat Dockerfile'
-                        dockerImage = docker.build(dockerimagenamefeat)
+                        dockerImage = docker.build(dockerimagenamefeat, "yosinesimyan/pdftotextfeat:latest .")
                     }
                 }
             }
@@ -57,28 +53,18 @@ pipeline {
                 script {
                    docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
                        dockerImage.push("1.${BUILD_NUMBER}")
+                       dockerImage.push("latest")
                    }
                 }
             }
         }        
-       // stage('Clear Old Docker image') {
-       //    steps {
-       //        script { 
-       //          //after the new image is ready, we stop and remove the old running docker image                
-       //          sh 'docker ps -aq --filter="name=WebServer" | xargs docker stop 2>/dev/null  | xargs docker rm 2>/dev/null || true'
-       //        }
-       //    }              
-       // }
-
+    
         stage('Run Docker Container') {
             steps {
                 echo "Running Docker ${dockerimagename}"
                 // Run the Docker container (adjust options as needed)
                 dir("app") {
                    withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
-                       // f = new File('.env')
-                       // f.append('echo MYSQL_USER=$MYSQL_USER')
-                       // f.append('\nMYSQL_PASSWORD=$MYSQL_PASSWORD')
                        sh 'echo "MYSQL_USER=$MYSQL_USER" > .env'
                        sh 'echo "MYSQL_PASSWORD=$MYSQL_PASSWORD" >> "\n" >> .env'
                         //sh 'docker run -d -p 5000:5000 --name WebServer ${dockerimagename}'
