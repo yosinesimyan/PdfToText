@@ -9,7 +9,8 @@ pipeline {
     //AWS_SECRET_ACCESS_KEY = credentials('your-aws-secret-access-key')
     AWS_REGION = 'us-east-1' // Change as needed
     INSTANCE_TYPE = 't2.micro' // Change as needed
-    AMI_ID = 'ami-066784287e358dad1' // Replace with a valid AMI ID
+    AMI_ID = 'ami-066784287e358dad1' // Replace with a valid AMI ID\
+    AWS_KEYPAIR = "Yosi-KP"
 
   }
     agent any
@@ -71,7 +72,7 @@ pipeline {
                     sh('export AWS_PAGER=""')
                     def instanceId = sh(script: '''
                         aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
-                        --key-name your-key-pair-name --query "Instances[0].InstanceId" --output text
+                        --key-name ${AWS_KEYPAIR} --query "Instances[0].InstanceId" --output text
                     ''', returnStdout: true).trim()
                     
                     // Wait until the instance is running
