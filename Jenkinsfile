@@ -5,6 +5,8 @@ pipeline {
     dockerimagenamefeat = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"
     lastdockerimagename = "yosinesimyan/pdftotext:1.${BUILD_NUMBER-1}"
     dockerImage = ""
+    //AWS_ACCESS_KEY_ID = credentials('aws-creds')
+    //AWS_SECRET_ACCESS_KEY = credentials('your-aws-secret-access-key')
     AWS_REGION = 'us-east-1' // Change as needed
     INSTANCE_TYPE = 't2.micro' // Change as needed
     AMI_ID = 'ami-066784287e358dad1' // Replace with a valid AMI ID\
