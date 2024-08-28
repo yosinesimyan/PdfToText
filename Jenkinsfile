@@ -5,8 +5,6 @@ pipeline {
     dockerimagenamefeat = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"
     lastdockerimagename = "yosinesimyan/pdftotext:1.${BUILD_NUMBER-1}"
     dockerImage = ""
-    //AWS_ACCESS_KEY_ID = credentials('aws-creds')
-    //AWS_SECRET_ACCESS_KEY = credentials('your-aws-secret-access-key')
     AWS_REGION = 'us-east-1' // Change as needed
     INSTANCE_TYPE = 't2.micro' // Change as needed
     AMI_ID = 'ami-066784287e358dad1' // Replace with a valid AMI ID\
@@ -89,16 +87,18 @@ pipeline {
                 script {
                     // Install Docker on the instance and run the container
                     withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
-
                         sh """
                         ssh -o StrictHostKeyChecking=no -i /root/.ssh/yosi-kp.pem ec2-user@${INSTANCE_DNS} '
                             sudo yum update -y &&
-                            sudo amazon-linux-extras install docker -y &&
+                            sudo yum install docker -y &&
                             sudo service docker start &&
                             sudo docker pull ${dockerimagename}:latest &&
+                            sudo aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
+                            sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+                            sudo chmod +x /usr/local/bin/docker-compose
                             echo "MYSQL_USER=$MYSQL_USER" > .env &&
                             echo "MYSQL_PASSWORD=$MYSQL_PASSWORD" >> "\n" >> .env &&
-                            sudo docker compose up
+                            sudo docker-compose up
                         '
                         """
                     }
