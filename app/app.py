@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_mysqldb import MySQL
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+import boto3
 import os
 import yaml
 import PyPDF2
@@ -20,6 +21,14 @@ app.config['MYSQL_DB'] = db['mysql_db']
 
 mysql = MySQL(app)
 ssql="SELECT concat(left(filename,5),'..',right(filename,4)) as filename, upload_time, filedesc, filename as fn, replace(filetext,'\r','<br>') FROM files WHERE username = %s"
+
+# AWS S3 configuration
+S3_BUCKET = 'your-s3-bucket-name'
+S3_REGION = 'your-s3-region'  # e.g., 'us-west-1'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+
+# Initialize S3 client
+s3 = boto3.client('s3', region_name=S3_REGION)
 
 # File upload configuration
 UPLOAD_FOLDER = 'uploads/'
@@ -97,8 +106,14 @@ def upload_file():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            
+            #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+             # Upload file to S3
+            s3.upload_fileobj(
+                file,
+                S3_BUCKET,
+                filename,
+                ExtraArgs={'ACL': 'public-read'}
+            )
             # Insert file info into database
             cur = mysql.connection.cursor()
             pdftext = pdf_to_text(os.path.join(app.config['UPLOAD_FOLDER'], filename))
@@ -134,7 +149,10 @@ def files():
 def uploaded_file(filename):
     if 'username' not in session:
         return redirect(url_for('home'))
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)   
+    #return send_from_directory(app.config['UPLOAD_FOLDER'], filename)   
+    # Generate S3 file URL
+    file_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{filename}"
+    return redirect(file_url)
 
 #render pdf to pext
 def pdf_to_text(pdf_path):
