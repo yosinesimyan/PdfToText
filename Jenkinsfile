@@ -84,10 +84,11 @@ pipeline {
                                curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
                                chmod +x /usr/local/bin/docker-compose
                       '''
+                      echo ${USER_DATA}
                       //Create the AWS EC2 Instance
                       def instanceId = sh(script: '''
                           aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
-                          --key-name ${AWS_KEYPAIR} --user-data ${USER_DATA} --query "Instances[0].InstanceId" --output text
+                          --key-name ${AWS_KEYPAIR} --user-data '${USER_DATA}' --query "Instances[0].InstanceId" --output text
                          ''', returnStdout: true).trim()
                     
                       // Wait until the instance is running
