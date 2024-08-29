@@ -36,8 +36,10 @@ pipeline {
         }       
         stage('Build features image') {
             when {
-                branch "files"
-            }
+                expression {
+                             return env.BRANCH_NAME != 'master';
+                       }           
+                      }
             steps {
                 echo "Running ${dockerimagenamefeat} on ${env.JENKINS_URL}"
                 //build the docker image that the app use.                 
