@@ -70,13 +70,24 @@ pipeline {
                 branch "AWS"
             }
             steps {
-                script {
-                                     dir("app") {
+                script {                                    
                       // Create EC2 instance
                       sh('export AWS_PAGER=""')
+                      // define UserData for AWS EC2 Instance pre-build
+                      USER_DATA = '''
+                               #!/bin/bash
+                               yum update -y
+                               yum install docker -y
+                               service docker start
+                               systemctl enable docker
+                               aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
+                               curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+                               chmod +x /usr/local/bin/docker-compose
+                      '''
+                      //Create the AWS EC2 Instance
                       def instanceId = sh(script: '''
                           aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
-                          --key-name ${AWS_KEYPAIR} --user-data file://userdata.txt --query "Instances[0].InstanceId" --output text
+                          --key-name ${AWS_KEYPAIR} --user-data ${USER_DATA} --query "Instances[0].InstanceId" --output text
                          ''', returnStdout: true).trim()
                     
                       // Wait until the instance is running
@@ -86,7 +97,6 @@ pipeline {
                       // Get the public DNS name of the instance
                       env.INSTANCE_DNS = sh(script: "aws ec2 describe-instances --instance-ids ${instanceId} --query 'Reservations[0].Instances[0].PublicDnsName' --output text", returnStdout: true).trim()
                      // aws cloudformation create-stack --stack-name PdfToText --template-body file://ec2-cf.yaml --capabilities CAPABILITY_NAMED_IAM
-                  }
                 }
             }
         }
