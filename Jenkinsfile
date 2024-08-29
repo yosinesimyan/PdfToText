@@ -88,7 +88,7 @@ pipeline {
                 script {
                      MYSQL_USER = "user1"
                      MYSQL_PASSWORD = "pass1"
-                     sshcommand="sudo yum update -y &&
+                     sshcommand="""sudo yum update -y &&
                             sudo yum install docker -y &&
                             sudo service docker start &&
                             sudo docker pull ${dockerimagename}:latest &&
@@ -97,7 +97,7 @@ pipeline {
                             sudo chmod +x /usr/local/bin/docker-compose
                             echo MYSQL_USER=${MYSQL_USER} > .env &&
                             echo MYSQL_PASSWORD=${MYSQL_PASSWORD} >> \n >> .env &&
-                            sudo docker-compose up"
+                            sudo docker-compose up"""
                     echo "${sshcommand}"
                     // Install Docker on the instance and run the container
                     withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
