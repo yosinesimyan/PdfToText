@@ -106,7 +106,7 @@ pipeline {
                     // Install Docker on the instance and run the container
                     withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
                         sh '''
-                        ssh -o StrictHostKeyChecking=no -i /root/.ssh/yosi-kp.pem ec2-user@${INSTANCE_DNS} '
+                        ssh -o StrictHostKeyChecking=no -i /var/jenkins_home/.ssh/yosi-kp.pem ec2-user@${INSTANCE_DNS} '
                             sudo yum update -y &&
                             sudo yum install docker -y &&
                             sudo service docker start &&
