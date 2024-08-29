@@ -75,7 +75,7 @@ pipeline {
                     sh('export AWS_PAGER=""')
                     def instanceId = sh(script: '''
                         aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
-                        --key-name ${AWS_KEYPAIR} --query "Instances[0].InstanceId" --output text
+                        --key-name ${AWS_KEYPAIR} --user-data file://userdata.txt --query "Instances[0].InstanceId" --output text
                     ''', returnStdout: true).trim()
                     
                     // Wait until the instance is running
@@ -98,13 +98,13 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
                         sh '''
                         ssh -o StrictHostKeyChecking=no -i /var/jenkins_home/.ssh/yosi-kp.pem ec2-user@${INSTANCE_DNS} '
-                            sudo yum update -y 
-                            sudo yum install docker -y 
-                            sudo service docker start 
+                            //sudo yum update -y 
+                            //sudo yum install docker -y 
+                            //sudo service docker start 
                             sudo docker pull '${dockerimagenamefeat}' 
-                            sudo aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
-                            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-                            sudo chmod +x /usr/local/bin/docker-compose
+                            //sudo aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
+                            //sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+                            //sudo chmod +x /usr/local/bin/docker-compose
                             echo "MYSQL_USER='${MYSQL_USER}'" > .env 
                             echo "MYSQL_PASSWORD='${MYSQL_PASSWORD}'" >> .env 
                             sudo docker-compose up 
