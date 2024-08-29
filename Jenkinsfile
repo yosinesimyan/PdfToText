@@ -94,34 +94,19 @@ pipeline {
             }
             steps {
                 script {
-                     MYSQL_USER = "user1"
-                     MYSQL_PASSWORD = "pass1"
-                     sshcommand = '''
-                                                        sudo yum update -y &&
-                            sudo yum install docker -y &&
-                            sudo service docker start &&
-                            sudo docker pull ${dockerimagename}:latest &&
-                            sudo aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
-                            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-                            sudo chmod +x /usr/local/bin/docker-compose
-                            echo "MYSQL_USER=${MYSQL_USER} >" .env &&
-                            echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> "\n" >> .env &&
-                            sudo docker-compose up
-                        '''
-                    echo "${sshcommand}"
                     // Install Docker on the instance and run the container
                     withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
                         sh '''
                         ssh -o StrictHostKeyChecking=no -i /var/jenkins_home/.ssh/yosi-kp.pem ec2-user@${INSTANCE_DNS} '
-                            sudo yum update -y &&
-                            sudo yum install docker -y &&
-                            sudo service docker start &&
-                            sudo docker pull '${dockerimagenamefeat}' &&
+                            sudo yum update -y 
+                            sudo yum install docker -y 
+                            sudo service docker start 
+                            sudo docker pull '${dockerimagenamefeat}' 
                             sudo aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
                             sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
                             sudo chmod +x /usr/local/bin/docker-compose
-                            echo "MYSQL_USER='${MYSQL_USER}'" > .env &&
-                            echo "MYSQL_PASSWORD='${MYSQL_PASSWORD}'" >> .env &&
+                            echo "MYSQL_USER='${MYSQL_USER}'" > .env 
+                            echo "MYSQL_PASSWORD='${MYSQL_PASSWORD}'" >> .env 
                             sudo docker-compose up 
                         '
                         '''
