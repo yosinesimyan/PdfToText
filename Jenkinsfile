@@ -71,20 +71,22 @@ pipeline {
             }
             steps {
                 script {
-                    // Create EC2 instance
-                    sh('export AWS_PAGER=""')
-                    def instanceId = sh(script: '''
-                        aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
-                        --key-name ${AWS_KEYPAIR} --user-data file://app/userdata.txt --query "Instances[0].InstanceId" --output text
-                    ''', returnStdout: true).trim()
+                                     dir("app") {
+                      // Create EC2 instance
+                      sh('export AWS_PAGER=""')
+                      def instanceId = sh(script: '''
+                          aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
+                          --key-name ${AWS_KEYPAIR} --user-data file://userdata.txt --query "Instances[0].InstanceId" --output text
+                         ''', returnStdout: true).trim()
                     
-                    // Wait until the instance is running
-                    sh "aws ec2 wait instance-running --instance-ids ${instanceId}"
-                    echo "Created EC2 instance: ${instanceId}"
+                      // Wait until the instance is running
+                      sh "aws ec2 wait instance-running --instance-ids ${instanceId}"
+                      echo "Created EC2 instance: ${instanceId}"
                     
-                    // Get the public DNS name of the instance
-                    env.INSTANCE_DNS = sh(script: "aws ec2 describe-instances --instance-ids ${instanceId} --query 'Reservations[0].Instances[0].PublicDnsName' --output text", returnStdout: true).trim()
-                   // aws cloudformation create-stack --stack-name PdfToText --template-body file://ec2-cf.yaml --capabilities CAPABILITY_NAMED_IAM
+                      // Get the public DNS name of the instance
+                      env.INSTANCE_DNS = sh(script: "aws ec2 describe-instances --instance-ids ${instanceId} --query 'Reservations[0].Instances[0].PublicDnsName' --output text", returnStdout: true).trim()
+                     // aws cloudformation create-stack --stack-name PdfToText --template-body file://ec2-cf.yaml --capabilities CAPABILITY_NAMED_IAM
+                  }
                 }
             }
         }
