@@ -66,6 +66,9 @@ pipeline {
             }
         }        
         stage('Create EC2 Instance') {
+            when {
+                branch "AWS"
+            }
             steps {
                 script {
                     // Create EC2 instance
@@ -86,6 +89,9 @@ pipeline {
             }
         }
         stage('Deploy Docker on EC2') {
+            when {
+                branch "AWS"
+            }
             steps {
                 script {
                      MYSQL_USER = "user1"
@@ -110,12 +116,12 @@ pipeline {
                             sudo yum update -y &&
                             sudo yum install docker -y &&
                             sudo service docker start &&
-                            sudo docker pull'${dockerimagename}':latest &&
+                            sudo docker pull '${dockerimagenamefeat}' &&
                             sudo aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
                             sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
                             sudo chmod +x /usr/local/bin/docker-compose
-                            echo "MYSQL_USER='${MYSQL_USER}' >" .env &&
-                            echo "MYSQL_PASSWORD='${MYSQL_PASSWORD}'" >> "\n" >> .env &&
+                            echo "MYSQL_USER='${MYSQL_USER}'" > .env &&
+                            echo "MYSQL_PASSWORD='${MYSQL_PASSWORD}'" >> .env &&
                             sudo docker-compose up 
                         '
                         '''
@@ -125,6 +131,11 @@ pipeline {
         }
 
         stage('Run Docker Container') {
+            when {
+                expression {
+                             return env.BRANCH_NAME != 'AWS';
+                       }     
+            }
             steps {
                 echo "Running Docker ${dockerimagename}"
                 // Run the Docker container (adjust options as needed)
