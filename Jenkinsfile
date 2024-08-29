@@ -110,7 +110,7 @@ pipeline {
                             sudo yum update -y &&
                             sudo yum install docker -y &&
                             sudo service docker start &&
-                            sudo docker pull ${dockerimagename}:latest &&
+                            sudo docker pull '''${dockerimagename}''':latest &&
                             sudo aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
                             sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
                             sudo chmod +x /usr/local/bin/docker-compose
