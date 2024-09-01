@@ -72,7 +72,7 @@ pipeline {
             steps {
                 script {                                    
                       // Create EC2 instance
-                      sh('export AWS_PAGER=""')
+                      //sh('export AWS_PAGER=""')
                       // define UserData for AWS EC2 Instance pre-build
                       
                       def userDataScript = '''#!/bin/bash                               
