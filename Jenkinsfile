@@ -92,8 +92,8 @@ pipeline {
                     //Create the AWS EC2 Instance
                     def instanceId = sh(script: '''
                         export AWS_PAGER=""
-                        aws ec2 run-instances --image-id '${AMI_ID}' --count 1 --instance-type '${INSTANCE_TYPE}' \
-                        --key-name '${AWS_KEYPAIR}' --user-data '${userDataEncoded}' --query "Instances[0].InstanceId" --output text
+                        aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
+                        --key-name ${AWS_KEYPAIR} --user-data ${userDataEncoded} --query "Instances[0].InstanceId" --output text
                         ''', returnStdout: true).trim()
                 
                     // Wait until the instance is running
