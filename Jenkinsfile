@@ -75,16 +75,7 @@ pipeline {
                     sh('export AWS_PAGER=""')
                     // define UserData for AWS EC2 Instance pre-build
                     
-                    def userDataScript = '''
-                        #!/bin/bash                               
-                        yum update -y
-                        yum install docker -y
-                        service docker start
-                        systemctl enable docker
-                        aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
-                        curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-                        chmod +x /usr/local/bin/docker-compose
-                        '''
+                    def userDataScript = ""
                     echo ${userDataScript}
                     
                     // Encode the user data script in Base64
