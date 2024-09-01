@@ -74,8 +74,7 @@ pipeline {
                     // Create EC2 instance
                     //sh('export AWS_PAGER=""')
                     // define UserData for AWS EC2 Instance pre-build                    
-                    def userDataScript = '''
-                        #!/bin/bash                               
+                    def userDataScript = '''#!/bin/bash                               
                         yum update -y
                         yum install docker -y
                         service docker start
@@ -93,7 +92,7 @@ pipeline {
                     def instanceId = sh(script: """
                         export AWS_PAGER=""
                         aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
-                        --key-name ${AWS_KEYPAIR} --user-data userDataScript --query "Instances[0].InstanceId" --output text
+                        --key-name ${AWS_KEYPAIR} --user-data '${userDataScript}' --query "Instances[0].InstanceId" --output text
                         """, returnStdout: true).trim()
                 
                     // Wait until the instance is running
