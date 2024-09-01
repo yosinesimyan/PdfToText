@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_mysqldb import MySQL
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+import AWS_Secrets
 import boto3
 import os
 import yaml
@@ -18,6 +19,8 @@ app.config['MYSQL_HOST'] = db['mysql_host']
 app.config['MYSQL_USER'] =  os.getenv('MYSQL_USER') #sys.argv[1] #db['mysql_user']
 app.config['MYSQL_PASSWORD'] =  os.getenv('MYSQL_PASSWORD') #sys.argv[2] #db['mysql_password']
 app.config['MYSQL_DB'] = db['mysql_db']
+
+#get secret from AWS Secrets Manager
 
 mysql = MySQL(app)
 ssql="SELECT concat(left(filename,5),'..',right(filename,4)) as filename, upload_time, filedesc, filename as fn, replace(filetext,'\r','<br>') FROM files WHERE username = %s"

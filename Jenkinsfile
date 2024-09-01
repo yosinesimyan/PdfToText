@@ -5,8 +5,6 @@ pipeline {
     dockerimagenamefeat = "yosinesimyan/pdftotextfeat:1.${BUILD_NUMBER}"
     lastdockerimagename = "yosinesimyan/pdftotext:1.${BUILD_NUMBER-1}"
     dockerImage = ""
-    //AWS_ACCESS_KEY_ID = credentials('aws-creds')
-    //AWS_SECRET_ACCESS_KEY = credentials('your-aws-secret-access-key')
     AWS_REGION = 'us-east-1' // Change as needed
     INSTANCE_TYPE = 't2.micro' // Change as needed
     AMI_ID = 'ami-066784287e358dad1' // Replace with a valid AMI ID\
@@ -38,8 +36,10 @@ pipeline {
         }       
         stage('Build features image') {
             when {
-                branch "files"
-            }
+                expression {
+                             return env.BRANCH_NAME != 'master';
+                       }           
+                      }
             steps {
                 echo "Running ${dockerimagenamefeat} on ${env.JENKINS_URL}"
                 //build the docker image that the app use.                 
@@ -60,53 +60,84 @@ pipeline {
                 script {
                    docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
                        dockerImage.push("1.${BUILD_NUMBER}")
-                       dockerImage.push("latest")
+                       //dockerImage.push("latest")
                    }
                 }
             }
         }        
         stage('Create EC2 Instance') {
+            when {
+                branch "AWS"
+            }
             steps {
-                script {
-                    // Create EC2 instance
-                    sh('export AWS_PAGER=""')
-                    def instanceId = sh(script: '''
-                        aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
-                        --key-name ${AWS_KEYPAIR} --query "Instances[0].InstanceId" --output text
-                    ''', returnStdout: true).trim()
+                script {                                    
+                      // Create EC2 instance
+                      sh('export AWS_PAGER=""')
+                      // define UserData for AWS EC2 Instance pre-build
+                      
+                      def userDataScript = '''#!/bin/bash                               
+                               yum update -y
+                               yum install docker -y
+                               service docker start
+                               systemctl enable docker
+                               aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
+                               curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+                               chmod +x /usr/local/bin/docker-compose
+                               '''
+                      echo ${userDataScript}
+                      
+                      // Encode the user data script in Base64
+                      def userDataEncoded = userDataScript.bytes.encodeBase64().toString()
+
+                      //Create the AWS EC2 Instance
+                      def instanceId = sh(script: '''
+                          aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
+                          --key-name ${AWS_KEYPAIR} --user-data ${userDataEncoded} --query "Instances[0].InstanceId" --output text
+                         ''', returnStdout: true).trim()
                     
-                    // Wait until the instance is running
-                    sh "aws ec2 wait instance-running --instance-ids ${instanceId}"
-                    echo "Created EC2 instance: ${instanceId}"
+                      // Wait until the instance is running
+                      sh "aws ec2 wait instance-running --instance-ids ${instanceId}"
+                      echo "Created EC2 instance: ${instanceId}"
                     
-                    // Get the public DNS name of the instance
-                    env.INSTANCE_DNS = sh(script: "aws ec2 describe-instances --instance-ids ${instanceId} --query 'Reservations[0].Instances[0].PublicDnsName' --output text", returnStdout: true).trim()
+                      // Get the public DNS name of the instance
+                      env.INSTANCE_DNS = sh(script: "aws ec2 describe-instances --instance-ids ${instanceId} --query 'Reservations[0].Instances[0].PublicDnsName' --output text", returnStdout: true).trim()
+                     // aws cloudformation create-stack --stack-name PdfToText --template-body file://ec2-cf.yaml --capabilities CAPABILITY_NAMED_IAM
                 }
             }
         }
         stage('Deploy Docker on EC2') {
+            when {
+                branch "AWS"
+            }
             steps {
                 script {
                     // Install Docker on the instance and run the container
                     withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
-
-                        sh """
-                        ssh -o StrictHostKeyChecking=no -i /root/.ssh/yosi-kp.pem ec2-user@${INSTANCE_DNS} '
-                            sudo yum update -y &&
-                            sudo amazon-linux-extras install docker -y &&
-                            sudo service docker start &&
-                            sudo docker pull ${dockerimagename}:latest &&
-                            echo "MYSQL_USER=$MYSQL_USER" > .env &&
-                            echo "MYSQL_PASSWORD=$MYSQL_PASSWORD" >> "\n" >> .env &&
-                            sudo docker compose up
+                        sh '''
+                        ssh -o StrictHostKeyChecking=no -i /var/jenkins_home/.ssh/yosi-kp.pem ec2-user@${INSTANCE_DNS} '
+                            //sudo yum update -y 
+                            //sudo yum install docker -y 
+                            //sudo service docker start 
+                            sudo docker pull '${dockerimagenamefeat}' 
+                            //sudo aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
+                            //sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+                            //sudo chmod +x /usr/local/bin/docker-compose
+                            echo "MYSQL_USER='${MYSQL_USER}'" > .env 
+                            echo "MYSQL_PASSWORD='${MYSQL_PASSWORD}'" >> .env 
+                            sudo docker-compose up 
                         '
-                        """
+                        '''
                     }
                 }
             }
         }
 
         stage('Run Docker Container') {
+            when {
+                expression {
+                             return env.BRANCH_NAME != 'AWS';
+                       }     
+            }
             steps {
                 echo "Running Docker ${dockerimagename}"
                 // Run the Docker container (adjust options as needed)

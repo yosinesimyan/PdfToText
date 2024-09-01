@@ -1,1 +1,7 @@
 PdfVenv/
+.vscode/extensions.json
+cloudformation/deploy-stack.sh
+cloudformation/ec2-cf.yaml
+testapp/test_app.py
+cloudformation/cf.yaml
+app/AWS_Secrets.py
