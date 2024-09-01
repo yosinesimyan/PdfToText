@@ -72,7 +72,11 @@ pipeline {
             steps {
                 script {                                    
                       // Create EC2 instance
+<<<<<<< HEAD
                       sh('export AWS_PAGER=""')
+=======
+                      //sh('export AWS_PAGER=""')
+>>>>>>> b623f0d8d75df3638a9558378a26dca8d6375b1e
                       // define UserData for AWS EC2 Instance pre-build
                       
                       def userDataScript = '''#!/bin/bash                               
@@ -81,7 +85,11 @@ pipeline {
                                service docker start
                                systemctl enable docker
                                aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
+<<<<<<< HEAD
                                curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+=======
+                               curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-'$(uname -s)'-'$(uname -m)'" -o /usr/local/bin/docker-compose
+>>>>>>> b623f0d8d75df3638a9558378a26dca8d6375b1e
                                chmod +x /usr/local/bin/docker-compose
                                '''
                       echo ${userDataScript}
