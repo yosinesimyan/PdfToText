@@ -74,8 +74,8 @@ pipeline {
                       // Create EC2 instance
                       sh('export AWS_PAGER=""')
                       // define UserData for AWS EC2 Instance pre-build
-                      USER_DATA = """
-                               #!/bin/bash 
+                      
+                      def userDataScript = '''#!/bin/bash                               
                                yum update -y
                                yum install docker -y
                                service docker start
@@ -83,12 +83,16 @@ pipeline {
                                aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
                                curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-'$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
                                chmod +x /usr/local/bin/docker-compose
-                      """
+                               '''
                       echo ${USER_DATA}
+                      
+                      // Encode the user data script in Base64
+                      def userDataEncoded = userDataScript.bytes.encodeBase64().toString()
+
                       //Create the AWS EC2 Instance
                       def instanceId = sh(script: '''
                           aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
-                          --key-name ${AWS_KEYPAIR} --user-data '${USER_DATA}' --query "Instances[0].InstanceId" --output text
+                          --key-name ${AWS_KEYPAIR} --user-data ${userDataEncoded} --query "Instances[0].InstanceId" --output text
                          ''', returnStdout: true).trim()
                     
                       // Wait until the instance is running
