@@ -71,45 +71,38 @@ pipeline {
             }
             steps {
                 script {                                    
-                      // Create EC2 instance
-<<<<<<< HEAD
-                      sh('export AWS_PAGER=""')
-=======
-                      //sh('export AWS_PAGER=""')
->>>>>>> b623f0d8d75df3638a9558378a26dca8d6375b1e
-                      // define UserData for AWS EC2 Instance pre-build
-                      
-                      def userDataScript = '''#!/bin/bash                               
-                               yum update -y
-                               yum install docker -y
-                               service docker start
-                               systemctl enable docker
-                               aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
-<<<<<<< HEAD
-                               curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-=======
-                               curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-'$(uname -s)'-'$(uname -m)'" -o /usr/local/bin/docker-compose
->>>>>>> b623f0d8d75df3638a9558378a26dca8d6375b1e
-                               chmod +x /usr/local/bin/docker-compose
-                               '''
-                      echo ${userDataScript}
-                      
-                      // Encode the user data script in Base64
-                      def userDataEncoded = userDataScript.bytes.encodeBase64().toString()
+                    // Create EC2 instance
+                    sh('export AWS_PAGER=""')
+                    // define UserData for AWS EC2 Instance pre-build
+                    
+                    def userDataScript = '''
+                        #!/bin/bash                               
+                        yum update -y
+                        yum install docker -y
+                        service docker start
+                        systemctl enable docker
+                        aws s3 cp s3://firstbucket-yosi/compose.yaml /home/ec2-user/compose.yaml
+                        curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+                        chmod +x /usr/local/bin/docker-compose
+                        '''
+                    echo ${userDataScript}
+                    
+                    // Encode the user data script in Base64
+                    def userDataEncoded = userDataScript.bytes.encodeBase64().toString()
 
-                      //Create the AWS EC2 Instance
-                      def instanceId = sh(script: '''
-                          aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
-                          --key-name ${AWS_KEYPAIR} --user-data ${userDataEncoded} --query "Instances[0].InstanceId" --output text
-                         ''', returnStdout: true).trim()
-                    
-                      // Wait until the instance is running
-                      sh "aws ec2 wait instance-running --instance-ids ${instanceId}"
-                      echo "Created EC2 instance: ${instanceId}"
-                    
-                      // Get the public DNS name of the instance
-                      env.INSTANCE_DNS = sh(script: "aws ec2 describe-instances --instance-ids ${instanceId} --query 'Reservations[0].Instances[0].PublicDnsName' --output text", returnStdout: true).trim()
-                     // aws cloudformation create-stack --stack-name PdfToText --template-body file://ec2-cf.yaml --capabilities CAPABILITY_NAMED_IAM
+                    //Create the AWS EC2 Instance
+                    def instanceId = sh(script: '''
+                        aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
+                        --key-name ${AWS_KEYPAIR} --user-data ${userDataEncoded} --query "Instances[0].InstanceId" --output text
+                        ''', returnStdout: true).trim()
+                
+                    // Wait until the instance is running
+                    sh "aws ec2 wait instance-running --instance-ids ${instanceId}"
+                    echo "Created EC2 instance: ${instanceId}"
+                
+                    // Get the public DNS name of the instance
+                    env.INSTANCE_DNS = sh(script: "aws ec2 describe-instances --instance-ids ${instanceId} --query 'Reservations[0].Instances[0].PublicDnsName' --output text", returnStdout: true).trim()
+                    // aws cloudformation create-stack --stack-name PdfToText --template-body file://ec2-cf.yaml --capabilities CAPABILITY_NAMED_IAM
                 }
             }
         }
