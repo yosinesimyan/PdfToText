@@ -90,11 +90,11 @@ pipeline {
                     def userDataEncoded = userDataScript.bytes.encodeBase64().toString()
 
                     //Create the AWS EC2 Instance
-                    def instanceId = sh(script: '''
+                    def instanceId = sh(script: """
                         export AWS_PAGER=""
                         aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
                         --key-name ${AWS_KEYPAIR} --user-data ${userDataEncoded} --query "Instances[0].InstanceId" --output text
-                        ''', returnStdout: true).trim()
+                        """, returnStdout: true).trim()
                 
                     // Wait until the instance is running
                     sh "aws ec2 wait instance-running --instance-ids ${instanceId}"
