@@ -9,6 +9,7 @@ pipeline {
     INSTANCE_TYPE = 't2.micro' // Change as needed
     AMI_ID = 'ami-066784287e358dad1' // Replace with a valid AMI ID\
     AWS_KEYPAIR = "Yosi-KP"
+    AWS_IAM_PROFILE = "EC2-S3-ACC"
 
   }
     agent any
@@ -92,7 +93,8 @@ pipeline {
                     def instanceId = sh(script: """
                         export AWS_PAGER=""
                         aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
-                        --key-name ${AWS_KEYPAIR} --user-data '${userDataScript}' --query "Instances[0].InstanceId" --output text
+                        --key-name ${AWS_KEYPAIR} --user-data '${userDataScript}' \
+                        --iam-instance-profile ${AWS_IAM_PROFILE} --query "Instances[0].InstanceId" --output text
                         """, returnStdout: true).trim()
                 
                     // Wait until the instance is running
@@ -129,8 +131,8 @@ pipeline {
         stage('Run Docker Container') {
             when {
                 expression {
-                             return env.BRANCH_NAME != 'AWS';
-                       }     
+                    return env.BRANCH_NAME != 'AWS';
+                }     
             }
             steps {
                 echo "Running Docker ${dockerimagename}"
