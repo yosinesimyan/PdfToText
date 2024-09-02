@@ -93,7 +93,7 @@ pipeline {
                     def instanceId = sh(script: """
                         export AWS_PAGER=""
                         aws ec2 run-instances --image-id ${AMI_ID} --count 1 --instance-type ${INSTANCE_TYPE} \
-                        --key-name ${AWS_KEYPAIR} --iam-instance-profile ${AWS_IAM_PROFILE} --user-data '${userDataScript}' \
+                        --key-name ${AWS_KEYPAIR} --iam-instance-profile '{"name": ${AWS_IAM_PROFILE}}' --user-data '${userDataScript}' \
                         --query "Instances[0].InstanceId" --output text
                         """, returnStdout: true).trim()
                 
