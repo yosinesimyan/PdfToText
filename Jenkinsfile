@@ -123,7 +123,7 @@ pipeline {
                         '''
                     }
                     sh '''
-                        ssh -o -i /var/jenkins_home/.ssh/yosi-kp.pem ec2-user@${INSTANCE_DNS} '
+                        ssh -i /var/jenkins_home/.ssh/yosi-kp.pem ec2-user@${INSTANCE_DNS} '
                             sudo docker pull '${dockerimagenamefeat}' 
                             sudo docker-compose up 
                         '
