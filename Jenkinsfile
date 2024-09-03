@@ -117,13 +117,17 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
                         sh '''
                         ssh -o StrictHostKeyChecking=no -i /var/jenkins_home/.ssh/yosi-kp.pem ec2-user@${INSTANCE_DNS} '
-                            sudo docker pull '${dockerimagenamefeat}' 
                             echo "MYSQL_USER='${MYSQL_USER}'" > .env 
                             echo "MYSQL_PASSWORD='${MYSQL_PASSWORD}'" >> .env 
-                            sudo docker-compose up 
                         '
                         '''
                     }
+                    sh '''
+                        ssh -o -i /var/jenkins_home/.ssh/yosi-kp.pem ec2-user@${INSTANCE_DNS} '
+                            sudo docker pull '${dockerimagenamefeat}' 
+                            sudo docker-compose up 
+                        '
+                        '''
                 }
             }
         }
