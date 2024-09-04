@@ -2,16 +2,20 @@ CREATE DATABASE user_db;
 
 USE user_db;
 
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(100) NOT NULL
-);
+CREATE TABLE `files` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) DEFAULT NULL,
+  `filedesc` varchar(100) DEFAULT NULL,
+  `filename` varchar(100) DEFAULT NULL,
+  `upload_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `filetext` text,
+  PRIMARY KEY (`id`)
+)
 
-CREATE TABLE files (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50),
-    filename VARCHAR(100),
-    filedesc VARCHAR(100),
-    upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+)
