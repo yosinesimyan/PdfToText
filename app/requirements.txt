@@ -1,7 +1,7 @@
 boto3==1.23.10
 botocore==1.26.10
 click==8.0.4
-dataclasses==0.8
+#dataclasses==0.8
 Flask==2.0.3
 Flask-MySQLdb==1.0.1
 Flask-WTF==1.0.1
