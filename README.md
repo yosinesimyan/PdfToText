@@ -27,6 +27,21 @@ To get started with this project, follow the instructions below.
 
 git clone https://github.com/yosinesimyan/PdfToText.git
 
+2. in aws consule add user jenkins.
+3. attach the user ec2fullaccess role
+4. add role to the user named AttachRole with custom inline:
+    {
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:GetRole",
+                "iam:PassRole"
+            ],
+            "Resource": "*"
+        }
+    ]
 2. build the jankins pipeline
 
 The application should now be running on http://127.0.0.1:5000/.
