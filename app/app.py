@@ -7,6 +7,7 @@ import os
 import yaml
 import PyPDF2
 import sys
+import re
 
 
 app = Flask(__name__)
@@ -15,25 +16,27 @@ app.secret_key = 'your_secret_key'
 # Configure MySQL
 db = yaml.load(open('db.yaml'), Loader=yaml.FullLoader)
 app.config['MYSQL_HOST'] = db['mysql_host']
-app.config['MYSQL_USER'] =  os.getenv('MYSQL_USER') #sys.argv[1] #db['mysql_user']
-app.config['MYSQL_PASSWORD'] =  os.getenv('MYSQL_PASSWORD') #sys.argv[2] #db['mysql_password']
+app.config['MYSQL_USER'] =  sys.argv[1] #os.getenv('MYSQL_USER') #sys.argv[1] #db['mysql_user']
+app.config['MYSQL_PASSWORD'] =  sys.argv[2] #os.getenv('MYSQL_PASSWORD') #sys.argv[2] #db['mysql_password']
 app.config['MYSQL_DB'] = db['mysql_db']
 
 mysql = MySQL(app)
-ssql="SELECT concat(left(filename,5),'..',right(filename,4)) as filename, upload_time, filedesc, filename as fn, replace(filetext,'\r','<br>') FROM files WHERE username = %s"
+ssql="SELECT concat(left(filename,5),'..',right(filename,4)) as filename, upload_time, filedesc, filename as fn, filetext FROM files WHERE username = %s"
 
 # AWS S3 configuration
-S3_BUCKET = 'your-s3-bucket-name'
-S3_REGION = 'your-s3-region'  # e.g., 'us-west-1'
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+S3_BUCKET = 'firstbucket-yosi'
+S3_REGION = 'us-east-1' 
 
 # Initialize S3 client
 s3 = boto3.client('s3', region_name=S3_REGION)
 
 # File upload configuration
-UPLOAD_FOLDER = 'uploads/'
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+UPLOAD_FOLDER = 'uploads/' #define uploads folder
+DOWNLOAD_FOLDER = 'downloads/' #define donloads folder
+ALLOWED_EXTENSIONS = {'pdf'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['DOWNLOAD_FOLDER'] = DOWNLOAD_FOLDER
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -48,7 +51,7 @@ def home():
 def login():
     username = request.form['username']
     password = request.form['password']
-    
+     
     #check user credentials in db
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT * FROM users WHERE username = %s", [username])
@@ -106,10 +109,11 @@ def upload_file():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-             # Upload file to S3
-            s3.upload_fileobj(
-                file,
+            fullpathfn = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(fullpathfn)
+            ## Upload file to S3
+            s3.upload_file(
+                fullpathfn,
                 S3_BUCKET,
                 filename,
                 ExtraArgs={'ACL': 'public-read'}
@@ -142,17 +146,24 @@ def files():
     cur.execute(ssql, [session['username']])
     files = cur.fetchall()
     cur.close()
+    return render_template('files.html', files=files, uname=session['username'], myre=re)
 
-    return render_template('files.html', files=files, uname=session['username'])
-
-@app.route('/uploads/<filename>')
+@app.route('/<filename>')
 def uploaded_file(filename):
     if 'username' not in session:
         return redirect(url_for('home'))
-    #return send_from_directory(app.config['UPLOAD_FOLDER'], filename)   
+    #return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     # Generate S3 file URL
-    file_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{filename}"
-    return redirect(file_url)
+    fullpathdfn = os.path.join(app.config['DOWNLOAD_FOLDER'], filename)
+    s3.download_file(
+        Filename=fullpathdfn,
+        Bucket=S3_BUCKET,
+        Key=filename,
+        #ExtraArgs={'ACL': 'public-read'} 
+    )
+    #file_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{filename}"
+    #return redirect(file_url)
+    return send_from_directory(app.config['DOWNLOAD_FOLDER'], filename)
 
 #render pdf to pext
 def pdf_to_text(pdf_path):
@@ -167,6 +178,8 @@ def pdf_to_text(pdf_path):
         for page_num in range(len(pdf_reader.pages)):
             page = pdf_reader.pages[page_num]
             text += page.extract_text()
+        #delete the file after rendering
+        os.remove(pdf_path)
         return text    
 
     # Write the extracted text to a text file
