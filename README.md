@@ -17,6 +17,9 @@ To get started with this project, follow the instructions below.
 
 - Python 3.x
 - Flask
+- Aws account
+- Jenkins
+- Dockerhub account
 
 ### Installation
 
