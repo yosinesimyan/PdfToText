@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Files</title>
+    <title>PdfToText</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
     <style>
       body, html {
@@ -55,11 +55,14 @@
     <div class="file-list-container">
       <h2 class="text-center">{{ uname }}'s Files</h2>
       <ul class="list-group file-list">
-        {% for filename, upload_time, filedesc, fn, filetext in files %}
+        {% for filename, upload_time, filedesc, fn, filetext, id in files %}
           <li class="list-group-item">
             <a href="#" onclick="showFile('{{ url_for('uploaded_file', filename=fn) }}', '{{ myre.escape(filetext) }}')">{{ filename }}</a>
-            <span class="text-muted float-right">{{ upload_time.strftime("%x") }}</span>
+            <span class="text-muted float-right">{{ upload_time.strftime("%x") }}</span><br>
             <span class="text-muted float-right">{{ filedesc }}</span>
+            <form action="{{ url_for('delete_file', fileid=id) }}" method="POST" style="display:inline;">
+                  <input type="image" src="{{ url_for('static', filename='images/delete.png') }}" alt="Delete" style="width: 20px; height: 20px;">
+            </form>
           </li>
         {% endfor %}
       </ul>

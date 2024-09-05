@@ -2,12 +2,12 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_mysqldb import MySQL
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-import boto3
 import os
 import yaml
 import PyPDF2
 import sys
 import re
+import s3_handler
 
 
 app = Flask(__name__)
@@ -21,14 +21,7 @@ app.config['MYSQL_PASSWORD'] =  os.getenv('MYSQL_PASSWORD') #sys.argv[2] #db['my
 app.config['MYSQL_DB'] = db['mysql_db']
 
 mysql = MySQL(app)
-ssql="SELECT concat(left(filename,5),'..',right(filename,4)) as filename, upload_time, filedesc, filename as fn, filetext FROM files WHERE username = %s"
-
-# AWS S3 configuration
-S3_BUCKET = 'firstbucket-yosi'
-S3_REGION = 'us-east-1' 
-
-# Initialize S3 client
-s3 = boto3.client('s3', region_name=S3_REGION)
+ssql="SELECT concat(left(filename,5),'..',right(filename,4)) as filename, upload_time, filedesc, filename as fn, filetext, id FROM files WHERE username = %s"
 
 # File upload configuration
 UPLOAD_FOLDER = 'uploads/' #define uploads folder
@@ -90,7 +83,7 @@ def register():
     return redirect(url_for('home'))
 
 #upload page
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['GET','POST'])
 def upload_file():
     pdftext = ''
     if 'username' not in session:
@@ -111,13 +104,7 @@ def upload_file():
             filename = secure_filename(file.filename)
             fullpathfn = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(fullpathfn)
-            ## Upload file to S3
-            s3.upload_file(
-                fullpathfn,
-                S3_BUCKET,
-                filename,
-                ExtraArgs={'ACL': 'public-read'}
-            )
+            s3_handler.upload_file_to_s3(fullpathfn, filename)
             # Insert file info into database
             cur = mysql.connection.cursor()
             pdftext = pdf_to_text(os.path.join(app.config['UPLOAD_FOLDER'], filename))
@@ -155,12 +142,7 @@ def uploaded_file(filename):
     #return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     # Generate S3 file URL
     fullpathdfn = os.path.join(app.config['DOWNLOAD_FOLDER'], filename)
-    s3.download_file(
-        Filename=fullpathdfn,
-        Bucket=S3_BUCKET,
-        Key=filename,
-        #ExtraArgs={'ACL': 'public-read'} 
-    )
+    s3_handler.download_file_from_s3(fullpathdfn, filename)
     #file_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{filename}"
     #return redirect(file_url)
     return send_from_directory(app.config['DOWNLOAD_FOLDER'], filename)
@@ -182,9 +164,40 @@ def pdf_to_text(pdf_path):
         os.remove(pdf_path)
         return text    
 
-    # Write the extracted text to a text file
-    # with open(output_txt, 'w', encoding='utf-8') as txt_file:
-    #    txt_file.write(text)
+@app.route('/delete/<fileid>', methods=['POST'])
+def delete_file(fileid):
+    # Get the current user
+    if 'username' not in session:
+        flash('Please log in first.')
+        return redirect(url_for('login'))
+
+    username = session['username']
+
+    # Step 1: Delete file from the S3 bucket
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("select filename FROM files WHERE id=%s AND username=%s", (fileid, username))        
+        filename = cur.fetchone()
+        cur.close()
+        if filename:
+          s3_handler.delete_file_from_s3(filename[0])
+
+    except Exception as e:
+        flash(f"Error deleting file from S3: {str(e)}")
+        return redirect(url_for('files'))
+
+    # Step 2: Delete file from MySQL database
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE FROM files WHERE id=%s AND username=%s", (fileid, username))
+        mysql.connection.commit()
+        cur.close()
+    except Exception as e:
+        flash(f"Error deleting file from the database: {str(e)}")
+        return redirect(url_for('files'))
+
+    flash(f"File '{filename}' deleted successfully.")
+    return redirect(url_for('files'))
 
 @app.route('/logout')
 def logout():
