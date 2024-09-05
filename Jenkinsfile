@@ -141,7 +141,7 @@ pipeline {
                     }
                     sh '''
                         ssh -i /var/jenkins_home/.ssh/yosi-kp.pem ec2-user@${INSTANCE_DNS} '
-                            sudo /usr/local/bin/docker-compose up 
+                            /usr/local/bin/docker-compose up 
                         '
                         '''
                 }
