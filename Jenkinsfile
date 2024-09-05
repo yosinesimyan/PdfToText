@@ -58,8 +58,8 @@ pipeline {
             when {
                 expression {
                              return env.BRANCH_NAME != 'master';
-                       }           
-                      }
+                }           
+            }
             steps {
                 //build the docker image that the app use.                 
                 script {
@@ -68,7 +68,8 @@ pipeline {
                         withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
                             sh 'echo "MYSQL_USER=$MYSQL_USER" > .env'
                             sh 'echo "MYSQL_PASSWORD=$MYSQL_PASSWORD" >> .env'
-                        sh 'docker run -d -p 5000:5000 --name TestServer ${dockerimagename}'                        
+                            sh 'docker run -d -p 5000:5000 --name TestServer ${dockerimagename}'  
+                        }                      
                     }
                  
                 }
