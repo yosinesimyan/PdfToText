@@ -139,7 +139,7 @@ pipeline {
                         '
                         '''
                     }
-                    withCredentials([usernamePassword(credentialsId: 'aws-creds', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-creds', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                         sh '''
                         ssh -o StrictHostKeyChecking=no -i /var/jenkins_home/.ssh/yosi-kp.pem ec2-user@${INSTANCE_DNS} '
                             echo "AWS_SERVER_PUBLIC_KEY='${AWS_ACCESS_KEY_ID}'" > .env 
