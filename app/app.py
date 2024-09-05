@@ -51,7 +51,7 @@ def home():
 def login():
     username = request.form['username']
     password = request.form['password']
-     
+   
     #check user credentials in db
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT * FROM users WHERE username = %s", [username])

@@ -52,7 +52,28 @@ pipeline {
                     }
                 }
             }
-        }       
+        }  
+        
+        stage('Build and run test image') {
+            when {
+                expression {
+                             return env.BRANCH_NAME != 'master';
+                       }           
+                      }
+            steps {
+                //build the docker image that the app use.                 
+                script {
+                    dir("app") {
+                        dockerImage = docker.build(dockerimagename, "DockerfileTest .")
+                        withCredentials([usernamePassword(credentialsId: 'Mysql-Credentials', passwordVariable: 'MYSQL_PASSWORD', usernameVariable: 'MYSQL_USER')]) {
+                            sh 'echo "MYSQL_USER=$MYSQL_USER" > .env'
+                            sh 'echo "MYSQL_PASSWORD=$MYSQL_PASSWORD" >> .env'
+                        sh 'docker run -d -p 5000:5000 --name TestServer ${dockerimagename}'                        
+                    }
+                 
+                }
+            }
+        }     
 
         stage('Pushing Image') {
             environment {
@@ -119,8 +140,7 @@ pipeline {
                     }
                     sh '''
                         ssh -i /var/jenkins_home/.ssh/yosi-kp.pem ec2-user@${INSTANCE_DNS} '
-                            //sudo docker pull '${dockerimagenamefeat}' 
-                            sudo docker-compose up 
+                            sudo /usr/local/bin/docker-compose up 
                         '
                         '''
                 }
