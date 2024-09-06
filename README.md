@@ -1,9 +1,9 @@
-# PdfToTExt
+# PdfToText
 this project introduce a pdf to text convertion using python
 
 # About the project
 
-This project is a simple REST API built with Flask that enables users to upload pdf files, keep them in s3 bucket and convert them to text. the data will be kept in MySql Satabaes and will be available to the user anytime.
+This project is a simple REST API built with Flask that enables users to upload pdf files, keep them in s3 bucket and convert them to text. the data will be kept in MySql Databaes and will be available to the user anytime.
 
 # CI/CD
 
@@ -16,7 +16,7 @@ To get started with this project, follow the instructions below.
 ### Prerequisites
 
 - Python 3.x
-- Flask
+- MySql Database
 - Aws account
 - Jenkins
 - Dockerhub account
@@ -44,7 +44,7 @@ git clone https://github.com/yosinesimyan/PdfToText.git
     ]
 2. build the jankins pipeline
 
-The application should now be running on http://127.0.0.1:5000/.
+The application should now be running on http://aws.public.ip:5000/.
 
 ### Usage
 
