@@ -16,9 +16,9 @@ To get started with this project, follow the instructions below.
 ### Prerequisites
 
 - Python 3.x
-- MySql Database
+- MySql Database(on premise or on docker in aws ec2 instance)
 - Aws account
-- Jenkins
+- Jenkins server
 - Dockerhub account
 
 ### Installation
@@ -42,7 +42,8 @@ git clone https://github.com/yosinesimyan/PdfToText.git
             "Resource": "*"
         }
     ]
-2. build the jankins pipeline
+5. configure jenkins pipline to use github scm
+6. build the jankins pipeline
 
 The application should now be running on http://aws.public.ip:5000/.
 
